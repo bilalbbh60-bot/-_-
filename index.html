@@ -1,513 +1,1014 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>مكتبة العالم — احترافي</title>
-
-<!-- Tailwind (CDN) to speed styling -->
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  body { background: linear-gradient(180deg,#081028,#021024); color: #e6eef8; font-family: Inter, system-ui, "Noto Naskh Arabic", sans-serif; }
-  .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.04); }
-  .btn-accent { background: linear-gradient(90deg,#06b6d4,#7c3aed); color:#001; }
-  .tab-scroll { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .tab-scroll::-webkit-scrollbar { display: none; }
-  .fade { transition: all .18s ease; }
-  .small-muted { color:#9fb3d6; font-size:13px; }
-  .ad-overlay { position: fixed; inset:0; display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6); z-index:60; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مكتبة العالم - World Library</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .tab-active {
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            color: white;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .post-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .tabs-container {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 mb-8">
+        <div class="container mx-auto px-4 py-4">
+            <div class="header-content flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="logo bg-gradient-to-r from-blue-500 to-purple-600 w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">مكتبة العالم</h1>
+                        <p class="text-sm text-gray-300">World Library - كل ما تبحث عنه في مكان واحد</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button id="customerAreaBtn" class="btn-primary flex items-center gap-2">
+                        <i class="fas fa-user"></i>
+                        مساحة الزبون
+                    </button>
+                    <button id="adminAccessBtn" class="glass px-4 py-2 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-cog"></i>
+                        دخول الأدمن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<div class="max-w-6xl mx-auto p-4 md:p-8">
-  <!-- Header -->
-  <header class="flex items-center justify-between gap-4">
-    <div>
-      <h1 class="text-2xl md:text-4xl font-extrabold">📚 مكتبة العالم</h1>
-      <p class="small-muted">واجهـة فخمة، دعم الجوال والحاسوب — نشر سريع وإدارة مرنة</p>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <button id="customerAreaBtn" class="px-3 py-2 rounded-full btn-accent shadow">مساحة الزبون</button>
-      <button id="openAdmin" class="px-3 py-2 rounded-full glass">⋮</button>
-    </div>
-  </header>
-
-  <!-- Tabs -->
-  <section class="mt-6">
-    <div class="tab-scroll flex gap-3 overflow-x-auto py-2">
-      <!-- tabs inserted by JS -->
-    </div>
-  </section>
-
-  <!-- Search & actions -->
-  <section class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-    <form id="searchForm" class="col-span-2 flex gap-2" onsubmit="return false;">
-      <input id="kw" class="flex-1 p-3 rounded-lg glass border border-slate-700" placeholder="ابحث بالكلمات المفتاحية داخل الخانة الحالية (مثال: رياضة,تمارين)" />
-      <button id="doSearch" class="px-4 rounded-lg btn-accent">🔎 بحث</button>
-    </form>
-
-    <div class="flex gap-2 justify-end">
-      <button id="newPostBtn" class="px-4 py-2 rounded-lg glass">➕ نشر (ADM/كود)</button>
-      <button id="promoteBtn" class="px-4 py-2 rounded-lg btn-accent">انشر 7 أيام بـ $3</button>
-    </div>
-  </section>
-
-  <!-- Content -->
-  <main class="mt-6">
-    <div id="content" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-
-    <div id="compareView" class="mt-6 glass p-4 rounded-lg hidden">
-      <h3 class="font-bold">📱 مقارنة الهواتف</h3>
-      <table class="w-full mt-3 text-center">
-        <thead><tr class="text-sm text-slate-300"><th class="p-2">الهاتف</th><th class="p-2">الرام</th><th class="p-2">التخزين</th><th class="p-2">البطارية</th></tr></thead>
-        <tbody id="compareTable"></tbody>
-      </table>
-    </div>
-  </main>
-
-  <footer class="mt-8 small-muted text-center">ارفع هذا الملف كـ index.html في root المستودع وفعل GitHub Pages.</footer>
-</div>
-
-<!-- Admin Modal -->
-<div id="adminModal" class="fixed inset-0 hidden items-center justify-center z-50">
-  <div class="w-full max-w-2xl p-6 rounded-xl glass">
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="font-bold text-lg">لوحة الأدمن ⚙️</h2>
-        <p class="small-muted">نظام آمن client-only — لا يتم عرض كلمة المرور.</p>
-      </div>
-      <div class="flex gap-2">
-        <button id="shareFB" class="px-3 py-2 rounded-lg btn-accent">روج لإعلانك</button>
-        <button id="closeAdmin" class="px-3 py-2 rounded-lg glass">إغلاق</button>
-      </div>
-    </div>
-
-    <hr class="my-4 border-slate-700">
-
-    <!-- Login area -->
-    <div id="adminLogin" class="">
-      <label class="small-muted">أدخل كلمة الأدمن</label>
-      <div class="mt-2 flex gap-2">
-        <input id="adminPass" type="password" class="flex-1 p-3 rounded-lg glass" placeholder="كلمة الأدمن" />
-        <button id="adminConfirm" class="px-4 py-2 rounded-lg btn-accent">دخول</button>
-      </div>
-    </div>
-
-    <!-- Panel -->
-    <div id="adminPanel" class="hidden mt-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div class="glass p-3 rounded-lg">
-          <div class="font-semibold">🔑 توليد كود</div>
-          <div class="mt-2 small-muted">كود صالح لمرة واحدة — أعطه للزبون.</div>
-          <div class="mt-3 flex gap-2">
-            <button id="genCode" class="px-3 py-2 rounded-lg btn-accent">توليد كود</button>
-            <button id="showCodes" class="px-3 py-2 rounded-lg glass">عرض الأكواد</button>
-          </div>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-12">
+        <!-- Tabs Navigation -->
+        <div class="tabs-container mb-8">
+            <div class="flex gap-2 overflow-x-auto pb-2">
+                <button class="tab-btn px-6 py-3 rounded-lg glass transition-all duration-300 tab-active" data-tab="media">
+                    <i class="fas fa-tv mr-2"></i>
+                    وسائل الإعلام الآلي
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg glass transition-all duration-300" data-tab="electronics">
+                    <i class="fas fa-plug mr-2"></i>
+                    الأجهزة الكهرو منزلية
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg glass transition-all duration-300" data-tab="games">
+                    <i class="fas fa-gamepad mr-2"></i>
+                    الألعاب
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg glass transition-all duration-300" data-tab="health">
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    الصحة ورياضة
+                </button>
+                <button class="tab-btn px-6 py-3 rounded-lg glass transition-all duration-300" data-tab="phones">
+                    <i class="fas fa-mobile-alt mr-2"></i>
+                    مقارنة الهواتف
+                </button>
+            </div>
         </div>
 
-        <div class="glass p-3 rounded-lg">
-          <div class="font-semibold">📣 رفع إعلان</div>
-          <div class="mt-2 small-muted">رفع صورة/فيديو ليشاهده الزوار.</div>
-          <input id="adFile" type="file" class="mt-2" />
-          <div class="mt-2 flex gap-2">
-            <select id="adType" class="p-2 rounded-lg glass">
-              <option value="video">فيديو (24s)</option>
-              <option value="image">صورة (5s)</option>
-            </select>
-            <button id="uploadAd" class="px-3 py-2 rounded-lg btn-accent">رفع</button>
-          </div>
+        <!-- Search Section -->
+        <div class="search-section mb-8">
+            <div class="glass p-6 rounded-xl">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <input type="text" id="searchInput" placeholder="ابحث بالكلمات المفتاحية داخل الخانة الحالية..." 
+                               class="w-full p-4 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="newPostBtn" class="btn-primary flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            نشر جديد
+                        </button>
+                        <button id="promoteBtn" class="glass px-6 py-4 rounded-lg flex items-center gap-2 hover:bg-slate-700 transition-colors">
+                            <i class="fas fa-ad"></i>
+                            انشر 7 أيام بـ $3
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="glass p-3 rounded-lg">
-          <div class="font-semibold">📊 الإحصاءات</div>
-          <div class="mt-2 small-muted">محفوظة محلياً</div>
-          <div class="mt-3 space-y-2">
-            <div class="flex justify-between"><span>👥 إجمالي زوار</span><span id="statTotal" class="font-semibold">0</span></div>
-            <div class="flex justify-between"><span>🔗 من فيسبوك</span><span id="statFB" class="font-semibold">0</span></div>
-            <div class="flex justify-between"><span>🌍 مباشرة</span><span id="statDirect" class="font-semibold">0</span></div>
-          </div>
+        <!-- Content Area -->
+        <div id="contentArea" class="fade-in">
+            <!-- Default content - will be replaced based on active tab -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Sample posts will be loaded here by JavaScript -->
+            </div>
         </div>
-      </div>
 
-      <div id="codesBox" class="mt-4 glass p-3 rounded-lg hidden"></div>
-
-      <hr class="my-4 border-slate-700" />
-
-      <div>
-        <h3 class="font-semibold">نشر يدوي (الأدمن)</h3>
-        <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input id="pTitle" placeholder="عنوان" class="p-3 rounded-lg glass" />
-          <input id="pKw" placeholder="كلمات مفتاحية (مفصولة بفواصل)" class="p-3 rounded-lg glass" />
-          <textarea id="pDesc" placeholder="وصف" class="p-3 rounded-lg glass col-span-2"></textarea>
-          <select id="pCat" class="p-3 rounded-lg glass">
-            <!-- filled by JS -->
-          </select>
-          <input id="pFiles" type="file" multiple class="col-span-2" />
-          <div class="col-span-2 flex gap-2">
-            <button id="publishNow" class="px-4 py-2 rounded-lg btn-accent">نشر الآن</button>
-            <button id="logoutAdmin" class="px-4 py-2 rounded-lg glass">تسجيل خروج</button>
-          </div>
+        <!-- Compare Phones Section (Hidden by default) -->
+        <div id="compareSection" class="hidden fade-in">
+            <div class="glass p-6 rounded-xl">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fas fa-mobile-alt"></i>
+                    مقارنة الهواتف
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center">
+                        <thead>
+                            <tr class="bg-slate-800">
+                                <th class="p-4">الهاتف</th>
+                                <th class="p-4">الشاشة</th>
+                                <th class="p-4">المعالج</th>
+                                <th class="p-4">الذاكرة</th>
+                                <th class="p-4">الكاميرا</th>
+                                <th class="p-4">البطارية</th>
+                                <th class="p-4">السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compareTable">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
+    </main>
 
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="glass p-8 rounded-xl w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">دخول الأدمن</h2>
+                <button id="closeAdminLogin" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <label for="adminPassword" class="block mb-2 text-gray-300">كلمة المرور:</label>
+                <input type="password" id="adminPassword" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل كلمة المرور">
+            </div>
+            
+            <button id="adminLoginBtn" class="btn-primary w-full py-3">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                دخول
+            </button>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- Customer Modal -->
-<div id="customerModal" class="fixed inset-0 hidden items-center justify-center z-40">
-  <div class="w-full max-w-xl p-6 rounded-xl glass">
-    <div class="flex justify-between">
-      <h3 class="font-bold">مساحة الزبون</h3>
-      <button id="closeCustomer" class="px-3 py-1 rounded-lg glass">إغلاق</button>
-    </div>
-
-    <div class="mt-3">
-      <label class="small-muted">أدخل كود النشر</label>
-      <div class="flex gap-2 mt-2">
-        <input id="customerCode" class="flex-1 p-3 rounded-lg glass" placeholder="ادخل الكود" />
-        <button id="redeemCode" class="px-3 py-2 rounded-lg btn-accent">تحقق</button>
-      </div>
-
-      <div id="customerFormWrap" class="mt-4 hidden">
-        <p class="small-muted">الكود صالح — يمكنك نشر منشور واحد فقط.</p>
-        <input id="custTitle" placeholder="العنوان" class="p-3 rounded-lg glass mt-2" />
-        <input id="custKw" placeholder="كلمات مفتاحية" class="p-3 rounded-lg glass mt-2" />
-        <textarea id="custDesc" placeholder="الوصف" class="p-3 rounded-lg glass mt-2"></textarea>
-        <select id="custCat" class="p-3 rounded-lg glass mt-2"></select>
-        <input id="custFiles" type="file" multiple class="mt-2" />
-        <div class="mt-3 flex gap-2">
-          <button id="custPublish" class="px-4 py-2 rounded-lg btn-accent">نشر المنشور</button>
+    <!-- Admin Panel Modal -->
+    <div id="adminPanelModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden overflow-y-auto py-8">
+        <div class="glass p-8 rounded-xl w-full max-w-4xl mx-4 max-h-full overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">لوحة التحكم - الأدمن</h2>
+                <button id="closeAdminPanel" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="p-4 rounded-lg bg-slate-800">
+                    <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-key"></i>
+                        توليد أكواد
+                    </h3>
+                    <p class="text-gray-300 mb-4">توليد أكواد للعملاء للنشر لمدة 7 أيام</p>
+                    <button id="generateCodeBtn" class="btn-primary w-full">
+                        توليد كود جديد
+                    </button>
+                    <div id="generatedCode" class="mt-4 p-3 bg-slate-700 rounded-lg text-center font-mono text-lg hidden"></div>
+                </div>
+                
+                <div class="p-4 rounded-lg bg-slate-800">
+                    <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-chart-bar"></i>
+                        الإحصائيات
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>إجمالي الزوار:</span>
+                            <span id="totalVisitors" class="font-bold">1,245</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>إجمالي المنشورات:</span>
+                            <span id="totalPosts" class="font-bold">86</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>الأكواد المستخدمة:</span>
+                            <span id="usedCodes" class="font-bold">24</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i>
+                    نشر منشور جديد
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-gray-300">العنوان:</label>
+                        <input type="text" id="postTitle" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل عنوان المنشور">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">الوصف:</label>
+                        <textarea id="postDescription" rows="4" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل وصف المنشور"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-gray-300">القسم:</label>
+                            <select id="postCategory" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="media">وسائل الإعلام الآلي</option>
+                                <option value="electronics">الأجهزة الكهرو منزلية</option>
+                                <option value="games">الألعاب</option>
+                                <option value="health">الصحة ورياضة</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block mb-2 text-gray-300">الكلمات المفتاحية:</label>
+                            <input type="text" id="postKeywords" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="كلمات مفتاحية مفصولة بفواصل">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">الصور/الفيديوهات:</label>
+                        <input type="file" id="postMedia" multiple class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <button id="publishPostBtn" class="btn-primary w-full py-3">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        نشر المنشور
+                    </button>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-ad"></i>
+                    إدارة الإعلانات
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-gray-300">نوع الإعلان:</label>
+                            <select id="adType" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="image">صورة (5 ثواني)</option>
+                                <option value="video">فيديو (24 ثانية)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block mb-2 text-gray-300">رفع ملف:</label>
+                            <input type="file" id="adFile" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <button id="uploadAdBtn" class="btn-primary w-full py-3">
+                        <i class="fas fa-upload mr-2"></i>
+                        رفع الإعلان
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Ad Modal -->
-<div id="adModal" class="hidden ad-overlay">
-  <div id="adHolder" class="w-full max-w-3xl p-4 rounded-lg glass"></div>
-</div>
+    <!-- Customer Area Modal -->
+    <div id="customerAreaModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="glass p-8 rounded-xl w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">مساحة الزبون</h2>
+                <button id="closeCustomerArea" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="customerCodeSection">
+                <div class="mb-6">
+                    <label for="customerCode" class="block mb-2 text-gray-300">أدخل كود النشر:</label>
+                    <input type="text" id="customerCode" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل الكود المكون من 8 أحرف">
+                </div>
+                
+                <button id="verifyCodeBtn" class="btn-primary w-full py-3">
+                    <i class="fas fa-check mr-2"></i>
+                    التحقق من الكود
+                </button>
+            </div>
+            
+            <div id="customerPostForm" class="hidden">
+                <h3 class="text-lg font-bold mb-4">نشر منشور جديد</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-2 text-gray-300">العنوان:</label>
+                        <input type="text" id="customerPostTitle" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل عنوان المنشور">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">الوصف:</label>
+                        <textarea id="customerPostDescription" rows="4" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="أدخل وصف المنشور"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">القسم:</label>
+                        <select id="customerPostCategory" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="media">وسائل الإعلام الآلي</option>
+                            <option value="electronics">الأجهزة الكهرو منزلية</option>
+                            <option value="games">الألعاب</option>
+                            <option value="health">الصحة ورياضة</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">الكلمات المفتاحية:</label>
+                        <input type="text" id="customerPostKeywords" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="كلمات مفتاحية مفصولة بفواصل">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-gray-300">الصور/الفيديوهات:</label>
+                        <input type="file" id="customerPostMedia" multiple class="w-full p-3 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <button id="customerPublishBtn" class="btn-primary w-full py-3">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        نشر المنشور
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script>
-/* ============ Core logic (client-only) ============ */
+    <!-- Ad Modal -->
+    <div id="adModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+        <div class="relative w-full max-w-2xl mx-4">
+            <div id="adContent" class="rounded-xl overflow-hidden">
+                <!-- Ad content will be inserted here -->
+            </div>
+            <div class="mt-4 text-center">
+                <p id="adTimer" class="text-white text-lg"></p>
+            </div>
+        </div>
+    </div>
 
-/* Precomputed hash of your admin password (SHA-256).
-   NOTE: This is the hash only (can't read the password from it). */
-const ADMIN_HASH = "5116bd58b6757e5a6d5396543a8c10d55a0ca3cb44d3dd1503c6ac5ae74b34f6";
+    <!-- Footer -->
+    <footer class="glass mt-12 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-300">© 2023 مكتبة العالم - جميع الحقوق محفوظة</p>
+            <div class="flex justify-center gap-4 mt-4">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-facebook text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fab fa-instagram text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
 
-/* Helpers */
-function uid(){ return Math.random().toString(36).slice(2,9) }
-function now(){ return Date.now() }
-function save(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
-function load(key, fallback){ try{ const v = JSON.parse(localStorage.getItem(key)); return v===null? fallback : (v||fallback); }catch(e){ return fallback }}
+    <script>
+        // البيانات الأساسية
+        const categories = {
+            media: "وسائل الإعلام الآلي",
+            electronics: "الأجهزة الكهرو منزلية",
+            games: "الألعاب",
+            health: "الصحة ورياضة",
+            phones: "مقارنة الهواتف"
+        };
 
-/* Categories (tabs) */
-const CATEGORIES = [
-  { key:'media', title:'وسائل الإعلام الآلي' },
-  { key:'electronics', title:'الأجهزة الكهرو منزلية' },
-  { key:'games', title:'الألعاب' },
-  { key:'health', title:'الصحة ورياضة' },
-  { key:'phones', title:'مقارنة الهواتف' }
-];
+        // بيانات نموذجية للمنشورات
+        let posts = JSON.parse(localStorage.getItem('worldLibraryPosts')) || [
+            {
+                id: 1,
+                title: "أفضل أجهزة التلفاز الذكية لعام 2023",
+                description: "مراجعة شاملة لأفضل أجهزة التلفاز الذكية المتاحة في السوق مع مقارنة بين المميزات والعيوب.",
+                category: "media",
+                keywords: ["تلفاز", "شاشة", "سمارت", "مراجعة"],
+                media: [],
+                date: "2023-10-15",
+                author: "admin"
+            },
+            {
+                id: 2,
+                title: "تمارين الصباح لزيادة النشاط اليومي",
+                description: "مجموعة من التمارين الرياضية البسيطة التي يمكن ممارستها في الصباح لزيادة النشاط والطاقة طوال اليوم.",
+                category: "health",
+                keywords: ["تمارين", "رياضة", "صباح", "نشاط"],
+                media: [],
+                date: "2023-10-14",
+                author: "admin"
+            },
+            {
+                id: 3,
+                title: "ألعاب الفيديو الأكثر انتظارًا في 2024",
+                description: "قائمة بأبرز ألعاب الفيديو التي سيتم إصدارها في العام القادم والتي يتطلع لها عشاق الألعاب.",
+                category: "games",
+                keywords: ["ألعاب", "فيديو", "2024", "إصدارات"],
+                media: [],
+                date: "2023-10-13",
+                author: "admin"
+            }
+        ];
 
-/* SHA-256 helper */
-async function sha256hex(str){
-  const enc = new TextEncoder().encode(str);
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+        // بيانات مقارنة الهواتف
+        const phoneComparison = [
+            {
+                name: "iPhone 15 Pro",
+                screen: "6.1 بوصة",
+                processor: "A17 Pro",
+                memory: "8GB",
+                camera: "48MP + 12MP + 12MP",
+                battery: "3274 mAh",
+                price: "$999"
+            },
+            {
+                name: "Samsung Galaxy S23 Ultra",
+                screen: "6.8 بوصة",
+                processor: "Snapdragon 8 Gen 2",
+                memory: "12GB",
+                camera: "200MP + 10MP + 10MP + 12MP",
+                battery: "5000 mAh",
+                price: "$1199"
+            },
+            {
+                name: "Google Pixel 8 Pro",
+                screen: "6.7 بوصة",
+                processor: "Google Tensor G3",
+                memory: "12GB",
+                camera: "50MP + 48MP + 48MP",
+                battery: "5050 mAh",
+                price: "$999"
+            },
+            {
+                name: "OnePlus 11",
+                screen: "6.7 بوصة",
+                processor: "Snapdragon 8 Gen 2",
+                memory: "16GB",
+                camera: "50MP + 48MP + 32MP",
+                battery: "5000 mAh",
+                price: "$699"
+            }
+        ];
 
-/* Initialize demo posts if none */
-if(!load('m_posts', null)) {
-  save('m_posts', [
-    { _id: uid(), title:'تمارين صباحية', description:'روتين صباحي سريع', media:[], link:'', categoryKey:'health', keywords:['رياضة','تمارين'], createdAt: now(), expiresAt: now()+7*24*3600*1000 },
-    { _id: uid(), title:'مراجعة هاتف', description:'تحليل مواصفات الجهاز', media:[], link:'', categoryKey:'media', keywords:['مراجعة','هاتف'], createdAt: now(), expiresAt: now()+7*24*3600*1000 }
-  ]);
-}
+        // أكواد العملاء
+        let customerCodes = JSON.parse(localStorage.getItem('worldLibraryCodes')) || [];
 
-/* Track visitors (local only) */
-(function trackVisit(){
-  const t = (parseInt(localStorage.getItem('vis_total')||'0') + 1);
-  localStorage.setItem('vis_total', t);
-  const ref = document.referrer || '';
-  if(ref.includes('facebook.com')) localStorage.setItem('vis_fb', (parseInt(localStorage.getItem('vis_fb')||'0')+1));
-  else localStorage.setItem('vis_direct', (parseInt(localStorage.getItem('vis_direct')||'0')+1));
-})();
+        // الإعلانات
+        let ads = JSON.parse(localStorage.getItem('worldLibraryAds')) || [];
 
-/* UI elements */
-const tabsContainer = document.querySelector('.tab-scroll');
-const content = document.getElementById('content');
-const compareView = document.getElementById('compareView');
-const compareTable = document.getElementById('compareTable');
+        // العناصر النشطة حالياً
+        let activeTab = 'media';
+        let activePosts = [];
+        let currentAd = null;
+        let adInterval = null;
 
-/* build tabs */
-let active = 'media';
-function buildTabs(){
-  tabsContainer.innerHTML='';
-  CATEGORIES.forEach(c=>{
-    const b = document.createElement('button');
-    b.className = 'px-4 py-2 rounded-full glass fade tab-btn';
-    b.textContent = c.title;
-    b.onclick = ()=> setActive(c.key);
-    if(c.key === active) b.classList.add('btn-accent');
-    tabsContainer.appendChild(b);
-  });
-}
-buildTabs();
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupEventListeners();
+            loadPostsByCategory(activeTab);
+        });
 
-/* setActive */
-function setActive(key){
-  active = key;
-  Array.from(tabsContainer.children).forEach(btn=>{
-    btn.classList.toggle('btn-accent', btn.textContent === CATEGORIES.find(x=>x.key===key).title);
-  });
-  document.getElementById('kw').value='';
-  if(key === 'phones'){ compareView.classList.remove('hidden'); content.classList.add('hidden'); renderCompare(); }
-  else{ compareView.classList.add('hidden'); content.classList.remove('hidden'); renderPosts(); }
-}
+        // تهيئة الصفحة
+        function initializePage() {
+            // حفظ البيانات في localStorage إذا لم تكن موجودة
+            if (!localStorage.getItem('worldLibraryPosts')) {
+                localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+            }
+            
+            if (!localStorage.getItem('worldLibraryCodes')) {
+                localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
+            }
+            
+            if (!localStorage.getItem('worldLibraryAds')) {
+                localStorage.setItem('worldLibraryAds', JSON.stringify(ads));
+            }
+            
+            // تحديث عدد الزوار
+            updateVisitorCount();
+        }
 
-/* render posts for active category */
-function renderPosts(){
-  const posts = (load('m_posts',[])||[]).filter(p=> p.categoryKey === active && (!p.expiresAt || p.expiresAt > now()));
-  content.innerHTML = '';
-  if(posts.length === 0){
-    content.innerHTML = `<div class="col-span-full glass p-6 rounded-lg text-center small-muted">لا توجد منشورات في هذه الخانة بعد.</div>`;
-    return;
-  }
-  posts.sort((a,b)=>b.createdAt - a.createdAt);
-  posts.forEach(p=>{
-    const card = document.createElement('article');
-    card.className = 'glass p-4 rounded-lg';
-    let inner = `<div class="small-muted">${escapeHtml(p.categoryKey)} • ${new Date(p.createdAt).toLocaleString()}</div>
-                 <h3 class="font-bold mt-2">${escapeHtml(p.title)} <span class="ml-2">✨</span></h3>
-                 <p class="mt-2 small-muted">${escapeHtml(p.description).slice(0,160)}</p>`;
-    if(p.media && p.media.length){
-      const m = p.media[0];
-      if(m.type.startsWith('image')) inner += `<img src="${m.url}" alt="" class="mt-3 rounded-lg w-full" />`;
-      else if(m.type.startsWith('video')) inner += `<video src="${m.url}" controls class="mt-3 rounded-lg w-full"></video>`;
-    }
-    card.innerHTML = inner;
-    content.appendChild(card);
-  });
-}
+        // إعداد مستمعي الأحداث
+        function setupEventListeners() {
+            // أزرار التبويب
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.getAttribute('data-tab');
+                    switchTab(tab);
+                });
+            });
 
-/* compare */
-function renderCompare(){
-  compareTable.innerHTML = '';
-  const data = [
-    { name:'iPhone 15', ram:'6GB', storage:'128GB', battery:'4000mAh' },
-    { name:'Samsung S24', ram:'12GB', storage:'256GB', battery:'5000mAh' }
-  ];
-  data.forEach(d=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="p-2">${d.name}</td><td class="p-2">${d.ram}</td><td class="p-2">${d.storage}</td><td class="p-2">${d.battery}</td>`;
-    compareTable.appendChild(tr);
-  });
-}
+            // زر البحث
+            document.getElementById('searchInput').addEventListener('input', function() {
+                searchPosts(this.value);
+            });
 
-/* search (keywords first) */
-document.getElementById('doSearch').addEventListener('click', ()=>{
-  const q = document.getElementById('kw').value.trim().toLowerCase();
-  if(!q){ renderPosts(); return; }
-  const posts = (load('m_posts',[])||[]).filter(p=> p.categoryKey === active && (
-    (p.keywords||[]).some(k=> k.toLowerCase().includes(q)) ||
-    (p.title||'').toLowerCase().includes(q) ||
-    (p.description||'').toLowerCase().includes(q)
-  ));
-  content.innerHTML = '';
-  if(posts.length===0){ content.innerHTML = `<div class="glass p-6 rounded-lg small-muted text-center">لا توجد نتائج مطابقة.</div>`; return; }
-  posts.forEach(p=>{
-    const card = document.createElement('article'); card.className = 'glass p-4 rounded-lg';
-    card.innerHTML = `<div class="small-muted">${escapeHtml(p.categoryKey)}</div><h3 class="font-bold">${escapeHtml(p.title)}</h3><p class="small-muted">${escapeHtml(p.description)}</p>`;
-    content.appendChild(card);
-  });
-});
+            // زر نشر جديد
+            document.getElementById('newPostBtn').addEventListener('click', function() {
+                document.getElementById('customerAreaModal').classList.remove('hidden');
+            });
 
-/* escape helper */
-function escapeHtml(s){ return (s||'').toString().replaceAll('<','&lt;').replaceAll('>','&gt;') }
+            // زر الترويج
+            document.getElementById('promoteBtn').addEventListener('click', function() {
+                window.open('https://www.facebook.com/yourpage', '_blank');
+            });
 
-/* Buttons wiring */
-document.getElementById('openAdmin').addEventListener('click', ()=> document.getElementById('adminModal').classList.remove('hidden'));
-document.getElementById('closeAdmin').addEventListener('click', ()=> document.getElementById('adminModal').classList.add('hidden'));
-document.getElementById('newPostBtn').addEventListener('click', ()=> document.getElementById('customerModal').classList.remove('hidden'));
-document.getElementById('closeCustomer').addEventListener('click', ()=> document.getElementById('customerModal').classList.add('hidden'));
-document.getElementById('promoteBtn').addEventListener('click', ()=> window.open("https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v",'_blank'));
-document.getElementById('shareFB').addEventListener('click', ()=> window.open("https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v",'_blank'));
+            // زر دخول الأدمن
+            document.getElementById('adminAccessBtn').addEventListener('click', function() {
+                document.getElementById('adminLoginModal').classList.remove('hidden');
+            });
 
-/* fill category selects */
-function fillCatSelects(){
-  const pCat = document.getElementById('pCat'); const custCat = document.getElementById('custCat');
-  pCat.innerHTML=''; custCat.innerHTML='';
-  CATEGORIES.filter(c=>c.key!=='phones').forEach(c=>{
-    const o = document.createElement('option'); o.value=c.key; o.textContent=c.title; pCat.appendChild(o);
-    const o2 = document.createElement('option'); o2.value=c.key; o2.textContent=c.title; custCat.appendChild(o2);
-  });
-}
-fillCatSelects();
+            // زر إغلاق نافذة الأدمن
+            document.getElementById('closeAdminLogin').addEventListener('click', function() {
+                document.getElementById('adminLoginModal').classList.add('hidden');
+            });
 
-/* Admin login */
-document.getElementById('adminConfirm').addEventListener('click', async ()=>{
-  const v = document.getElementById('adminPass').value.trim();
-  if(!v) return alert('أدخل كلمة الأدمن');
-  const hv = await sha256hex(v);
-  if(hv === ADMIN_HASH){
-    document.getElementById('adminLogin').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    document.getElementById('adminPass').value='';
-    refreshStats();
-    renderPosts();
-    showCodes(false);
-  } else alert('كلمة مرور خاطئة');
-});
+            // زر دخول الأدمن
+            document.getElementById('adminLoginBtn').addEventListener('click', function() {
+                const password = document.getElementById('adminPassword').value;
+                if (password === '2009bbh2009') {
+                    document.getElementById('adminLoginModal').classList.add('hidden');
+                    document.getElementById('adminPanelModal').classList.remove('hidden');
+                    document.getElementById('adminPassword').value = '';
+                    updateAdminStats();
+                } else {
+                    alert('كلمة المرور غير صحيحة!');
+                }
+            });
 
-/* Logout admin */
-document.getElementById('logoutAdmin').addEventListener('click', ()=>{
-  document.getElementById('adminPanel').classList.add('hidden');
-  document.getElementById('adminLogin').classList.remove('hidden');
-});
+            // زر إغلاق لوحة الأدمن
+            document.getElementById('closeAdminPanel').addEventListener('click', function() {
+                document.getElementById('adminPanelModal').classList.add('hidden');
+            });
 
-/* Generate code */
-document.getElementById('genCode').addEventListener('click', ()=>{
-  const codes = load('m_codes',[]);
-  const code = 'MK-' + Math.random().toString(36).slice(2,8).toUpperCase();
-  codes.push({ code, days:7, createdAt: now(), used:false });
-  save('m_codes', codes);
-  alert('تولد كود: ' + code + '\nانسخه واعطه للزبون. صالح لمرة واحدة.');
-  showCodes(true);
-});
+            // زر توليد كود
+            document.getElementById('generateCodeBtn').addEventListener('click', function() {
+                generateCustomerCode();
+            });
 
-/* Show codes UI */
-document.getElementById('showCodes').addEventListener('click', ()=> showCodes(true));
-function showCodes(force){
-  const box = document.getElementById('codesBox');
-  const codes = load('m_codes',[]);
-  if(codes.length === 0) box.innerHTML = '<div class="small-muted">لا توجد أكواد مولدة</div>';
-  else box.innerHTML = `<div class="font-semibold">الأكواد (${codes.length})</div>` + codes.map(c=>`<div class="mt-2 p-2 glass rounded flex justify-between items-center"><div>${c.code} — ${c.used? '<span class="small-muted">مستخدم</span>':'<span class="font-semibold">متاح</span>'}</div><div><button data-code="${c.code}" class="copyBtn px-2 py-1 rounded glass">نسخ</button></div></div>`).join('');
-  box.classList.toggle('hidden', !force);
-  box.querySelectorAll('.copyBtn').forEach(btn=> btn.onclick = ()=> { navigator.clipboard?.writeText(btn.dataset.code).then(()=> alert('نسخ الكود')); });
-}
+            // زر نشر منشور (الأدمن)
+            document.getElementById('publishPostBtn').addEventListener('click', function() {
+                publishPostAsAdmin();
+            });
 
-/* Publish Now (admin) */
-document.getElementById('publishNow').addEventListener('click', async ()=>{
-  const title = document.getElementById('pTitle').value.trim();
-  const desc = document.getElementById('pDesc').value.trim();
-  const kws = document.getElementById('pKw').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const cat = document.getElementById('pCat').value;
-  const files = document.getElementById('pFiles').files;
-  if(!title) return alert('أدخل عنواناً');
-  const media = [];
-  for(const f of files) media.push({ url: await fileToDataURL(f), type: f.type });
-  const posts = load('m_posts',[]);
-  const createdAt = now();
-  posts.push({ _id: uid(), title, description: desc, media, link:'', categoryKey: cat, keywords: kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 });
-  save('m_posts', posts);
-  alert('تم النشر بنجاح');
-  document.getElementById('pTitle').value=''; document.getElementById('pDesc').value=''; document.getElementById('pKw').value=''; document.getElementById('pFiles').value='';
-  renderPosts();
-});
+            // زر رفع إعلان
+            document.getElementById('uploadAdBtn').addEventListener('click', function() {
+                uploadAd();
+            });
 
-/* Upload Ad */
-document.getElementById('uploadAd').addEventListener('click', async ()=>{
-  const f = document.getElementById('adFile').files[0];
-  const type = document.getElementById('adType').value;
-  if(!f) return alert('اختر ملف الإعلان');
-  const data = await fileToDataURL(f);
-  save('m_ad', { type, data, length: type==='video'?24:5 });
-  alert('تم رفع الإعلان محلياً.');
-});
+            // زر مساحة الزبون
+            document.getElementById('customerAreaBtn').addEventListener('click', function() {
+                document.getElementById('customerAreaModal').classList.remove('hidden');
+            });
 
-/* Show ad when needed */
-async function showAdIfNeeded(){
-  const ad = load('m_ad', null);
-  const access = parseInt(localStorage.getItem('adAccessUntil')||'0',10);
-  if(!ad) return;
-  if(access > now()) return;
-  const adModal = document.getElementById('adModal');
-  const adHolder = document.getElementById('adHolder');
-  adHolder.innerHTML = '';
-  if(ad.type === 'video'){
-    const v = document.createElement('video'); v.src = ad.data; v.controls = true; v.autoplay = true; v.style.width='100%';
-    adHolder.appendChild(v);
-    const info = document.createElement('div'); info.className='small-muted mt-2'; info.textContent = `شاهد ${ad.length} ثانية لتنشيط الاستخدام لـ24 ساعة.`;
-    adHolder.appendChild(info);
-    adModal.classList.remove('hidden');
-    const interval = setInterval(()=> {
-      try{ if(Math.floor(v.currentTime) >= ad.length){ clearInterval(interval); adModal.classList.add('hidden'); localStorage.setItem('adAccessUntil', (now() + 24*3600*1000)); alert('تم تفعيل الموقع 24 ساعة'); } }catch(e){}
-    }, 500);
-  } else {
-    const img = document.createElement('img'); img.src = ad.data; img.style.width='100%';
-    adHolder.appendChild(img);
-    adModal.classList.remove('hidden');
-    setTimeout(()=> { adModal.classList.add('hidden'); localStorage.setItem('adAccessUntil', (now() + 24*3600*1000)); alert('تم تفعيل الموقع 24 ساعة'); }, 5000);
-  }
-}
+            // زر إغلاق مساحة الزبون
+            document.getElementById('closeCustomerArea').addEventListener('click', function() {
+                document.getElementById('customerAreaModal').classList.add('hidden');
+                resetCustomerForm();
+            });
 
-/* Customer redeem code */
-document.getElementById('redeemCode').addEventListener('click', ()=>{
-  const code = document.getElementById('customerCode').value.trim();
-  if(!code) return alert('أدخل الكود');
-  const codes = load('m_codes',[]);
-  const found = codes.find(c=> c.code === code && !c.used);
-  if(!found) return alert('الكود غير صحيح أو مستخدم');
-  // allocate code in session to this user
-  sessionStorage.setItem('allocated_code', code);
-  document.getElementById('customerFormWrap').classList.remove('hidden');
-});
+            // زر التحقق من الكود
+            document.getElementById('verifyCodeBtn').addEventListener('click', function() {
+                verifyCustomerCode();
+            });
 
-/* Customer publish (one post only) */
-document.getElementById('custPublish').addEventListener('click', async ()=>{
-  const code = sessionStorage.getItem('allocated_code');
-  if(!code) return alert('لم تتحقق من الكود');
-  const title = document.getElementById('custTitle').value.trim();
-  const desc = document.getElementById('custDesc').value.trim();
-  const kws = document.getElementById('custKw').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const cat = document.getElementById('custCat').value;
-  const files = document.getElementById('custFiles').files;
-  if(!title) return alert('أدخل عنوان');
-  const media = [];
-  for(const f of files) media.push({ url: await fileToDataURL(f), type: f.type });
-  const posts = load('m_posts',[]);
-  const createdAt = now();
-  posts.push({ _id: uid(), title, description: desc, media, link:'', categoryKey: cat, keywords: kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 });
-  save('m_posts', posts);
-  // mark code used
-  const codes = load('m_codes',[]);
-  const idx = codes.findIndex(c=> c.code === code);
-  if(idx>=0){ codes[idx].used = true; codes[idx].usedAt = now(); save('m_codes', codes); }
-  sessionStorage.removeItem('allocated_code');
-  alert('تم النشر — الكود أصبح مستخدماً.');
-  document.getElementById('customerModal').classList.add('hidden');
-  renderPosts();
-});
+            // زر نشر منشور (الزبون)
+            document.getElementById('customerPublishBtn').addEventListener('click', function() {
+                publishPostAsCustomer();
+            });
 
-/* Helpers: file->dataURL */
-function fileToDataURL(file){
-  return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
+            // عرض إعلان عشوائي كل 10 دقائق
+            setInterval(showRandomAd, 600000);
+        }
 
-/* refresh stats */
-function refreshStats(){
-  document.getElementById('statTotal').textContent = localStorage.getItem('vis_total') || 0;
-  document.getElementById('statFB').textContent = localStorage.getItem('vis_fb') || 0;
-  document.getElementById('statDirect').textContent = localStorage.getItem('vis_direct') || 0;
-}
+        // تبديل التبويبات
+        function switchTab(tab) {
+            // تحديث أزرار التبويب
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-tab') === tab) {
+                    btn.classList.add('tab-active');
+                } else {
+                    btn.classList.remove('tab-active');
+                }
+            });
 
-/* init */
-(async function init(){
-  setActive(active);
-  renderPosts();
-  showAdIfNeeded();
-  refreshStats();
-})();
+            activeTab = tab;
 
-</script>
+            if (tab === 'phones') {
+                document.getElementById('contentArea').classList.add('hidden');
+                document.getElementById('compareSection').classList.remove('hidden');
+                renderPhoneComparison();
+            } else {
+                document.getElementById('contentArea').classList.remove('hidden');
+                document.getElementById('compareSection').classList.add('hidden');
+                loadPostsByCategory(tab);
+            }
+        }
+
+        // تحميل المنشورات حسب التصنيف
+        function loadPostsByCategory(category) {
+            activePosts = posts.filter(post => post.category === category);
+            renderPosts(activePosts);
+        }
+
+        // عرض المنشورات
+        function renderPosts(postsToRender) {
+            const contentArea = document.getElementById('contentArea');
+            
+            if (postsToRender.length === 0) {
+                contentArea.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-inbox text-5xl text-gray-500 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-400">لا توجد منشورات في هذا القسم بعد</h3>
+                        <p class="text-gray-500 mt-2">كن أول من ينشر في هذا القسم!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let postsHTML = '';
+            
+            postsToRender.forEach(post => {
+                postsHTML += `
+                    <div class="post-card glass p-6 rounded-xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold">${post.title}</h3>
+                            <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">${categories[post.category]}</span>
+                        </div>
+                        
+                        <p class="text-gray-300 mb-4">${post.description}</p>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${post.keywords.map(keyword => `<span class="text-xs bg-slate-700 text-gray-300 px-2 py-1 rounded">#${keyword}</span>`).join('')}
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-sm text-gray-400">
+                            <span>${post.date}</span>
+                            <span>${post.author === 'admin' ? 'بواسطة: الأدمن' : 'بواسطة: زبون'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentArea.innerHTML = postsHTML;
+        }
+
+        // عرض مقارنة الهواتف
+        function renderPhoneComparison() {
+            const compareTable = document.getElementById('compareTable');
+            let tableHTML = '';
+            
+            phoneComparison.forEach(phone => {
+                tableHTML += `
+                    <tr class="border-b border-slate-700 hover:bg-slate-800 transition-colors">
+                        <td class="p-4 font-bold">${phone.name}</td>
+                        <td class="p-4">${phone.screen}</td>
+                        <td class="p-4">${phone.processor}</td>
+                        <td class="p-4">${phone.memory}</td>
+                        <td class="p-4">${phone.camera}</td>
+                        <td class="p-4">${phone.battery}</td>
+                        <td class="p-4 font-bold text-green-400">${phone.price}</td>
+                    </tr>
+                `;
+            });
+            
+            compareTable.innerHTML = tableHTML;
+        }
+
+        // البحث في المنشورات
+        function searchPosts(query) {
+            if (!query) {
+                renderPosts(activePosts);
+                return;
+            }
+            
+            const filteredPosts = activePosts.filter(post => 
+                post.title.toLowerCase().includes(query.toLowerCase()) ||
+                post.description.toLowerCase().includes(query.toLowerCase()) ||
+                post.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+            );
+            
+            renderPosts(filteredPosts);
+        }
+
+        // تحديث عدد الزوار
+        function updateVisitorCount() {
+            let visitorCount = localStorage.getItem('worldLibraryVisitors') || 0;
+            visitorCount = parseInt(visitorCount) + 1;
+            localStorage.setItem('worldLibraryVisitors', visitorCount);
+        }
+
+        // تحديث إحصائيات الأدمن
+        function updateAdminStats() {
+            document.getElementById('totalVisitors').textContent = localStorage.getItem('worldLibraryVisitors') || 0;
+            document.getElementById('totalPosts').textContent = posts.length;
+            document.getElementById('usedCodes').textContent = customerCodes.filter(code => code.used).length;
+        }
+
+        // توليد كود للعميل
+        function generateCustomerCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            
+            for (let i = 0; i < 8; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            customerCodes.push({
+                code: code,
+                used: false,
+                generatedAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
+            
+            document.getElementById('generatedCode').textContent = code;
+            document.getElementById('generatedCode').classList.remove('hidden');
+            
+            alert(`تم توليد الكود: ${code}\nسيتم حذف هذا الكود تلقائياً بعد 7 أيام.`);
+        }
+
+        // نشر منشور كأدمن
+        function publishPostAsAdmin() {
+            const title = document.getElementById('postTitle').value;
+            const description = document.getElementById('postDescription').value;
+            const category = document.getElementById('postCategory').value;
+            const keywords = document.getElementById('postKeywords').value.split(',').map(k => k.trim());
+            
+            if (!title || !description) {
+                alert('يرجى ملء جميع الحقول المطلوبة!');
+                return;
+            }
+            
+            const newPost = {
+                id: posts.length + 1,
+                title: title,
+                description: description,
+                category: category,
+                keywords: keywords,
+                media: [],
+                date: new Date().toISOString().split('T')[0],
+                author: 'admin'
+            };
+            
+            posts.push(newPost);
+            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+            
+            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
+            if (activeTab === category) {
+                loadPostsByCategory(activeTab);
+            }
+            
+            // إعادة تعيين النموذج
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postDescription').value = '';
+            document.getElementById('postKeywords').value = '';
+            
+            alert('تم نشر المنشور بنجاح!');
+            updateAdminStats();
+        }
+
+        // رفع إعلان
+        function uploadAd() {
+            const adType = document.getElementById('adType').value;
+            const adFile = document.getElementById('adFile').files[0];
+            
+            if (!adFile) {
+                alert('يرجى اختيار ملف للإعلان!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newAd = {
+                    id: ads.length + 1,
+                    type: adType,
+                    content: e.target.result,
+                    duration: adType === 'image' ? 5 : 24,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                ads.push(newAd);
+                localStorage.setItem('worldLibraryAds', JSON.stringify(ads));
+                
+                alert('تم رفع الإعلان بنجاح!');
+                document.getElementById('adFile').value = '';
+            };
+            
+            reader.readAsDataURL(adFile);
+        }
+
+        // التحقق من كود العميل
+        function verifyCustomerCode() {
+            const code = document.getElementById('customerCode').value.trim().toUpperCase();
+            const validCode = customerCodes.find(c => c.code === code && !c.used);
+            
+            if (validCode) {
+                document.getElementById('customerCodeSection').classList.add('hidden');
+                document.getElementById('customerPostForm').classList.remove('hidden');
+            } else {
+                alert('الكود غير صحيح أو已被使用!');
+            }
+        }
+
+        // نشر منشور كعميل
+        function publishPostAsCustomer() {
+            const title = document.getElementById('customerPostTitle').value;
+            const description = document.getElementById('customerPostDescription').value;
+            const category = document.getElementById('customerPostCategory').value;
+            const keywords = document.getElementById('customerPostKeywords').value.split(',').map(k => k.trim());
+            const code = document.getElementById('customerCode').value.trim().toUpperCase();
+            
+            if (!title || !description) {
+                alert('يرجى ملء جميع الحقول المطلوبة!');
+                return;
+            }
+            
+            const newPost = {
+                id: posts.length + 1,
+                title: title,
+                description: description,
+                category: category,
+                keywords: keywords,
+                media: [],
+                date: new Date().toISOString().split('T')[0],
+                author: 'customer'
+            };
+            
+            posts.push(newPost);
+            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+            
+            // تعليم الكود كمستخدم
+            const codeIndex = customerCodes.findIndex(c => c.code === code);
+            if (codeIndex !== -1) {
+                customerCodes[codeIndex].used = true;
+                customerCodes[codeIndex].usedAt = new Date().toISOString();
+                localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
+            }
+            
+            // إغلاق النافذة وإعادة التعيين
+            document.getElementById('customerAreaModal').classList.add('hidden');
+            resetCustomerForm();
+            
+            alert('تم نشر المنشور بنجاح! سيبقى المنشور لمدة 7 أيام.');
+            
+            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
+            if (activeTab === category) {
+                loadPostsByCategory(activeTab);
+            }
+        }
+
+        // إعادة تعيين نموذج العميل
+        function resetCustomerForm() {
+            document.getElementById('customerCode').value = '';
+            document.getElementById('customerPostTitle').value = '';
+            document.getElementById('customerPostDescription').value = '';
+            document.getElementById('customerPostKeywords').value = '';
+            document.getElementById('customerPostMedia').value = '';
+            
+            document.getElementById('customerCodeSection').classList.remove('hidden');
+            document.getElementById('customerPostForm').classList.add('hidden');
+        }
+
+        // عرض إعلان عشوائي
+        function showRandomAd() {
+            if (ads.length === 0) return;
+            
+            const randomAd = ads[Math.floor(Math.random() * ads.length)];
+            currentAd = randomAd;
+            
+            const adModal = document.getElementById('adModal');
+            const adContent = document.getElementById('adContent');
+            const adTimer = document.getElementById('adTimer');
+            
+            if (randomAd.type === 'image') {
+                adContent.innerHTML = `<img src="${randomAd.content}" alt="إعلان" class="w-full h-auto">`;
+            } else {
+                adContent.innerHTML = `
+                    <video controls autoplay class="w-full h-auto">
+                        <source src="${randomAd.content}" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                `;
+            }
+            
+            adModal.classList.remove('hidden');
+            
+            let secondsLeft = randomAd.duration;
+            adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
+            
+            adInterval = setInterval(() => {
+                secondsLeft--;
+                adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(adInterval);
+                    adModal.classList.add('hidden');
+                    
+                    // منح المستخدم صلاحية استخدام الموقع لمدة 24 ساعة
+                    const accessUntil = new Date();
+                    accessUntil.setHours(accessUntil.getHours() + 24);
+                    localStorage.setItem('worldLibraryAccessUntil', accessUntil.toISOString());
+                    
+                    alert('تم تفعيل استخدام الموقع لمدة 24 ساعة!');
+                }
+            }, 1000);
+        }
+    </script>
 </body>
-  </html>
+                              </html>
