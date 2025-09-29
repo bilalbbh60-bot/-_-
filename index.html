@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>مكتبة العالم — Demo</title>
+  <style>
+    :root{ --bg:#071030; --card:#0f172a; --accent1:#06b6d4; --accent2:#7c3aed; color-scheme: dark; }
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,"Noto Naskh Arabic",sans-serif;background:linear-gradient(180deg,var(--bg),#021029);color:#e6eef8}
+    .wrap{max-width:1100px;margin:18px auto;padding:18px;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{font-size:22px;margin:0}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:8px 0}
+    .tab{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);cursor:pointer;white-space:nowrap}
+    .tab.active{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
+    .search{margin-top:12px;display:flex;gap:8px}
+    input[type="text"]{flex:1;padding:8px;border-radius:10px;border:0;background:#0b1220;color:inherit}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}
+    .card{background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.4)}
+    .card img, .card video{width:100%;border-radius:8px;margin-top:8px}
+    footer{margin-top:20px;text-align:center;color:#9fb3d6;font-size:13px}
+    button.btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:0;color:#001;padding:8px 12px;border-radius:10px;cursor:pointer}
+    /* Admin modal */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
+    .panel{width:94%;max-width:760px;background:linear-gradient(180deg,#071330,#071a36);padding:18px;border-radius:14px}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    label{font-size:13px;color:#9fb3d6}
+    small.tip{color:#9fb3d6;font-size:12px}
+    .promo{background:#081226;padding:10px;border-radius:10px;margin-top:8px}
+    .fade{transition:all .28s ease}
+    .emoji{font-size:18px;margin-left:6px}
+    .compare-table{width:100%;border-collapse:collapse}
+    .compare-table th,.compare-table td{border:1px solid rgba(255,255,255,0.06);padding:8px;text-align:center}
+    .muted{color:#9fb3d6;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>📚 مكتبة العالم</h1>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="btnCompare" class="btn">مقارنة الهواتف</button>
+        <button id="openAdmin" class="btn">⋮</button>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <form id="searchForm" class="search">
+      <input id="kw" type="text" placeholder="ادخل كلمات مفتاحية (مثال: رياضة,تمارين)" />
+      <button class="btn" type="submit">🔎 بحث</button>
+      <button class="btn" id="btnNewPost" type="button">➕ نشر (ADM/كود)</button>
+      <button class="btn" id="payBtn" type="button">انشر 7 أيام بـ $3</button>
+    </form>
+
+    <section id="content" class="grid"></section>
+
+    <div id="compareView" style="display:none;margin-top:18px" class="card">
+      <h3>📱 مقارنة الهواتف</h3>
+      <table class="compare-table" id="compareTable">
+        <thead><tr><th>هاتف</th><th>رام</th><th>التخزين</th><th>البطارية</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted">يمكنك تعديل المواصفات في الكود لاحقاً أو جلبها من API.</p>
+    </div>
+
+    <footer>
+      صفحة تجريبية للعمل على GitHub Pages — لرفعها: ضع هذا الملف `index.html` في root المستودع وفعل GitHub Pages.<br>
+      زر روج لإعلانك يفتح حساب فيسبوك الذي أعطيتني رابطه.
+    </footer>
+  </div>
+
+  <!-- Admin modal (hidden) -->
+  <div id="adminModal" class="modal" style="display:none">
+    <div class="panel fade">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>لوحة الادمن ⚙️</strong> <span class="emoji">🔐</span></div>
+        <div style="display:flex;gap:8px">
+          <button id="shareFB" class="btn">روج لإعلانك</button>
+          <button id="closeAdmin" class="btn">إغلاق</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div id="loginBlock">
+          <label>أدخل كلمة الادمن</label>
+          <div class="row" style="margin-top:6px">
+            <input id="adminPass" type="password" placeholder="كلمة المرور" style="flex:1;padding:8px;border-radius:8px;border:0;background:#06121b;color:inherit" />
+            <button id="doLogin" class="btn">دخول</button>
+          </div>
+          <small class="tip">الملاحظة: كلمة المرور المطلوبة (مؤقتاً) هي <strong>2009bbh2009</strong></small>
+        </div>
+
+        <div id="panelBlock" style="display:none;margin-top:12px">
+          <div class="row">
+            <button id="genCode" class="btn">توليد كود 7 أيام</button>
+            <button id="viewCodes" class="btn">عرض الأكواد</button>
+            <button id="closePanel" class="btn">تسجيل خروج</button>
+          </div>
+
+          <div class="promo" id="codesList" style="display:none"></div>
+
+          <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)" />
+
+          <h4>إنشاء منشور يدوي</h4>
+          <div style="margin-top:8px">
+            <label>العنوان</label>
+            <input id="pTitle" type="text" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit" />
+            <label>الوصف</label>
+            <textarea id="pDesc" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit"></textarea>
+            <label>كلمات مفتاحية (مفصولة بفواصل)</label>
+            <input id="pKw" type="text" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit" />
+            <label>اختر الخانة</label>
+            <select id="pCat" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit;margin-top:6px">
+            </select>
+            <label>صور/فيديو (من جهازك)</label>
+            <input type="file" id="pFiles" multiple style="margin-top:6px" />
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="publishBtn" class="btn">نشر الآن</button>
+              <button id="publishWithCodeBtn" class="btn">نشر باستخدام كود</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="muted">ملحوظة: المنشورات تحفظ محلياً وستبقى في متصفحك حتى تحذفها أو تنتهي صلاحيتها (7 أيام).</div>
+    </div>
+  </div>
+
+<script>
+/* ====== App data & helpers (client-only demo) ====== */
+const FB_LINK = "https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v";
+const CATEGORIES = [
+  { key:'media', title:'وسائل الإعلام الآلي' },
+  { key:'electronics', title:'الأجهزة الكهرو منزلية' },
+  { key:'games', title:'الألعاب' },
+  { key:'health', title:'الصحة ورياضة' },
+  { key:'phones', title:'مقارنة الهواتف' }
+];
+
+function uid(){ return Math.random().toString(36).slice(2,9) }
+function now(){ return Date.now() }
+function savePosts(list){ localStorage.setItem('m_posts', JSON.stringify(list)) }
+function loadPosts(){ try { return JSON.parse(localStorage.getItem('m_posts')||'[]') } catch(e){ return [] } }
+function saveCodes(c){ localStorage.setItem('m_codes', JSON.stringify(c)) }
+function loadCodes(){ try { return JSON.parse(localStorage.getItem('m_codes')||'[]') } catch(e){ return [] } }
+
+/* delete expired posts on load */
+function cleanupExpired(){
+  const arr = loadPosts().filter(p => !p.expiresAt || p.expiresAt > now())
+  savePosts(arr)
+}
+cleanupExpired()
+
+/* ====== Build UI ====== */
+const tabsEl = document.getElementById('tabs')
+const content = document.getElementById('content')
+const compareView = document.getElementById('compareView')
+const compareTableBody = document.querySelector('#compareTable tbody')
+
+// render tabs
+let active = CATEGORIES[0].key
+CATEGORIES.forEach(c=>{
+  const b = document.createElement('button')
+  b.className = 'tab fade' + (c.key===active? ' active':'')
+  b.textContent = c.title
+  b.onclick = ()=>{ setActive(c.key) }
+  tabsEl.appendChild(b)
+})
+
+// fill admin category select
+const pCat = document.getElementById('pCat')
+CATEGORIES.filter(x=>x.key!=='phones').forEach(c=>{
+  const o = document.createElement('option'); o.value=c.key; o.textContent=c.title; pCat.appendChild(o)
+})
+
+function setActive(k){
+  active = k
+  Array.from(tabsEl.children).forEach(btn=> btn.classList.toggle('active', btn.textContent===CATEGORIES.find(x=>x.key===k).title))
+  document.getElementById('kw').value = ''
+  render()
+  if(k==='phones'){ document.getElementById('compareView').style.display='block'; content.style.display='none' }
+  else{ document.getElementById('compareView').style.display='none'; content.style.display='grid' }
+}
+
+/* ====== Render posts ====== */
+function render(){
+  if(active==='phones'){ renderCompare(); return }
+  const all = loadPosts().filter(p => p.categoryKey === active)
+  const grid = content
+  grid.innerHTML = ''
+  if(all.length===0){ grid.innerHTML = '<div class="muted">لا توجد منشورات في هذه الخانة بعد.</div>'; return }
+  all.sort((a,b)=>b.createdAt - a.createdAt)
+  all.forEach(p=>{
+    const d = document.createElement('article'); d.className = 'card fade'
+    d.innerHTML = `<div class="muted">${p.categoryKey} • ${new Date(p.createdAt).toLocaleString()}</div>
+      <h3 style="margin:8px 0;font-weight:700">${escapeHtml(p.title)} <span class="emoji">✨</span></h3>
+      <p>${escapeHtml(p.description).slice(0,200)}</p>`
+    if(p.media && p.media.length){
+      const m = p.media[0]
+      if(m.type.startsWith('image')){ const img = document.createElement('img'); img.src = m.url; d.appendChild(img) }
+      else if(m.type.startsWith('video')){ const v = document.createElement('video'); v.controls=true; v.src = m.url; d.appendChild(v) }
+    }
+    grid.appendChild(d)
+  })
+}
+
+/* simple escape */
+function escapeHtml(s){ return (s||'').toString().replaceAll('<','&lt;').replaceAll('>','&gt;') }
+
+/* search */
+document.getElementById('searchForm').addEventListener('submit', e=>{
+  e.preventDefault()
+  const q = document.getElementById('kw').value.trim()
+  if(!q){ render(); return }
+  const arr = loadPosts().filter(p => p.categoryKey === active && (p.keywords||[]).some(k=> k.includes(q) || q.includes(k) || p.title.includes(q) || p.description.includes(q)))
+  content.innerHTML = ''
+  if(arr.length===0){ content.innerHTML = '<div class="muted">لا توجد نتائج مطابقة.</div>'; return }
+  arr.forEach(p=>{
+    const d = document.createElement('article'); d.className='card fade'
+    d.innerHTML = `<div class="muted">${p.categoryKey} • ${new Date(p.createdAt).toLocaleString()}</div>
+      <h3 style="margin:8px 0;font-weight:700">${escapeHtml(p.title)} <span class="emoji">🔎</span></h3>
+      <p>${escapeHtml(p.description)}</p>`
+    content.appendChild(d)
+  })
+})
+
+/* compare view */
+function renderCompare(){
+  compareTableBody.innerHTML = ''
+  const data = [
+    { name:'iPhone 15', ram:'6GB', storage:'128GB', battery:'4000mAh' },
+    { name:'Samsung S24', ram:'12GB', storage:'256GB', battery:'5000mAh' }
+  ]
+  data.forEach(d=>{
+    const tr = document.createElement('tr')
+    tr.innerHTML = `<td>${d.name}</td><td>${d.ram}</td><td>${d.storage}</td><td>${d.battery}</td>`
+    compareTableBody.appendChild(tr)
+  })
+}
+
+/* New post button -> open admin modal if not logged */
+document.getElementById('btnNewPost').addEventListener('click', ()=> openAdmin())
+
+/* pay button -> redirect to your FB link (as you requested) */
+document.getElementById('payBtn').addEventListener('click', ()=>{
+  // redirect to facebook (where you said you'll receive payment/contact)
+  window.open(FB_LINK, '_blank')
+})
+
+/* admin modal logic */
+const adminModal = document.getElementById('adminModal')
+const loginBlock = document.getElementById('loginBlock')
+const panelBlock = document.getElementById('panelBlock')
+const adminPassInput = document.getElementById('adminPass')
+document.getElementById('openAdmin').onclick = openAdmin
+document.getElementById('closeAdmin').onclick = ()=>{ adminModal.style.display='none' }
+document.getElementById('shareFB').onclick = ()=> window.open(FB_LINK,'_blank')
+
+function openAdmin(){
+  adminModal.style.display = 'flex'
+  loginBlock.style.display = 'block'
+  panelBlock.style.display = 'none'
+}
+
+/* admin login: password is 2009bbh2009 (client-side demo) */
+document.getElementById('doLogin').addEventListener('click', ()=>{
+  const v = adminPassInput.value
+  if(v === '2009bbh2009'){
+    loginBlock.style.display='none'
+    panelBlock.style.display='block'
+    adminPassInput.value = ''
+    render()
+  } else alert('خطأ في كلمة المرور')
+})
+
+/* generate promo code */
+document.getElementById('genCode').addEventListener('click', ()=>{
+  const codes = loadCodes()
+  const code = 'MK' + Math.random().toString(36).slice(2,8).toUpperCase()
+  codes.push({ code, days:7, createdAt: now(), used:false })
+  saveCodes(codes)
+  alert('تولد كود: ' + code + '\\nاعطه للمستخدم ليستخدمه في صفحة الإدخال.')
+  showCodes()
+})
+document.getElementById('viewCodes').addEventListener('click', showCodes)
+function showCodes(){
+  const box = document.getElementById('codesList'); box.style.display='block'
+  const codes = loadCodes()
+  box.innerHTML = '<strong>الأكواد المولدة:</strong><br/>' + codes.map(c=>`<div style="padding:6px;border-radius:8px;margin-top:6px;background:#001323">${c.code} — ${c.days} يوم — ${c.used? 'مستخدم':''}</div>`).join('')
+}
+
+/* generate post from admin form */
+document.getElementById('publishBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('pTitle').value.trim()
+  const desc = document.getElementById('pDesc').value.trim()
+  const kws = document.getElementById('pKw').value.split(',').map(s=>s.trim()).filter(Boolean)
+  const cat = document.getElementById('pCat').value
+  const files = document.getElementById('pFiles').files
+  if(!title){ alert('ضع عنوان') ; return }
+  const media = []
+  for(const f of files){
+    const data = await fileToDataURL(f)
+    media.push({ url:data, type:f.type })
+  }
+  const posts = loadPosts()
+  const createdAt = now()
+  posts.push({ _id: uid(), title, description:desc, media, link:'', categoryKey:cat, keywords:kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 })
+  savePosts(posts)
+  alert('تم النشر محلياً ✅')
+  render()
+})
+
+/* publish with code: prompt for code then allow publish (client-only check) */
+document.getElementById('publishWithCodeBtn').addEventListener('click', async ()=>{
+  const code = prompt('ضع كود النشر الذي حصلت عليه:')
+  if(!code) return
+  const codes = loadCodes()
+  const found = codes.find(c=>c.code === code && !c.used)
+  if(!found) return alert('الكود غير صحيح أو مستخدم')
+  // use it (mark used)
+  found.used = true
+  saveCodes(codes)
+  alert('الكود صالح — الآن املأ بيانات المنشور في النموذج ثم اضغط نشر الآن')
+})
+
+/* helper: file -> dataURL */
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader()
+    r.onload = ()=> res(r.result)
+    r.onerror = rej
+    r.readAsDataURL(file)
+  })
+}
+
+/* logout / close panel */
+document.getElementById('closePanel').addEventListener('click', ()=>{
+  adminModal.style.display='none'
+  loginBlock.style.display='block'
+  panelBlock.style.display='none'
+})
+
+/* quick open FB from footer */
+document.getElementById('btnCompare').addEventListener('click', ()=> setActive('phones'))
+
+/* initial render */
+setActive(active)
+render()
+</script>
+</body>
+</html>
