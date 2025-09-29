@@ -448,7 +448,7 @@
         <div class="container mx-auto px-4 text-center">
             <p class="text-gray-300">© 2023 مكتبة العالم - جميع الحقوق محفوظة</p>
             <div class="flex justify-center gap-4 mt-4">
-                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <a href="https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v" class="text-gray-400 hover:text-white transition-colors" target="_blank">
                     <i class="fab fa-facebook text-xl"></i>
                 </a>
                 <a href="#" class="text-gray-400 hover:text-white transition-colors">
@@ -481,7 +481,8 @@
                 keywords: ["تلفاز", "شاشة", "سمارت", "مراجعة"],
                 media: [],
                 date: "2023-10-15",
-                author: "admin"
+                author: "admin",
+                expiresAt: null
             },
             {
                 id: 2,
@@ -491,7 +492,8 @@
                 keywords: ["تمارين", "رياضة", "صباح", "نشاط"],
                 media: [],
                 date: "2023-10-14",
-                author: "admin"
+                author: "admin",
+                expiresAt: null
             },
             {
                 id: 3,
@@ -501,7 +503,8 @@
                 keywords: ["ألعاب", "فيديو", "2024", "إصدارات"],
                 media: [],
                 date: "2023-10-13",
-                author: "admin"
+                author: "admin",
+                expiresAt: null
             }
         ];
 
@@ -562,6 +565,9 @@
             initializePage();
             setupEventListeners();
             loadPostsByCategory(activeTab);
+            
+            // تنظيف المنشورات المنتهية الصلاحية
+            cleanupExpiredPosts();
         });
 
         // تهيئة الصفحة
@@ -603,9 +609,9 @@
                 document.getElementById('customerAreaModal').classList.remove('hidden');
             });
 
-            // زر الترويج
+            // زر الترويج - تم تحديث الرابط
             document.getElementById('promoteBtn').addEventListener('click', function() {
-                window.open('https://www.facebook.com/yourpage', '_blank');
+                window.open('https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v', '_blank');
             });
 
             // زر دخول الأدمن
@@ -702,7 +708,11 @@
 
         // تحميل المنشورات حسب التصنيف
         function loadPostsByCategory(category) {
-            activePosts = posts.filter(post => post.category === category);
+            // تصفية المنشورات حسب التصنيف والصلاحية
+            activePosts = posts.filter(post => 
+                post.category === category && 
+                (!post.expiresAt || new Date(post.expiresAt) > new Date())
+            );
             renderPosts(activePosts);
         }
 
@@ -724,11 +734,17 @@
             let postsHTML = '';
             
             postsToRender.forEach(post => {
+                const isExpired = post.expiresAt && new Date(post.expiresAt) <= new Date();
+                if (isExpired) return; // تخطي المنشورات المنتهية
+                
                 postsHTML += `
                     <div class="post-card glass p-6 rounded-xl">
                         <div class="flex justify-between items-start mb-4">
                             <h3 class="text-xl font-bold">${post.title}</h3>
-                            <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">${categories[post.category]}</span>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">${categories[post.category]}</span>
+                                ${post.expiresAt ? `<span class="text-xs bg-amber-500 text-white px-2 py-1 rounded-full">ينتهي في: ${new Date(post.expiresAt).toLocaleDateString('ar-EG')}</span>` : ''}
+                            </div>
                         </div>
                         
                         <p class="text-gray-300 mb-4">${post.description}</p>
@@ -794,221 +810,3 @@
         }
 
         // تحديث إحصائيات الأدمن
-        function updateAdminStats() {
-            document.getElementById('totalVisitors').textContent = localStorage.getItem('worldLibraryVisitors') || 0;
-            document.getElementById('totalPosts').textContent = posts.length;
-            document.getElementById('usedCodes').textContent = customerCodes.filter(code => code.used).length;
-        }
-
-        // توليد كود للعميل
-        function generateCustomerCode() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            
-            for (let i = 0; i < 8; i++) {
-                code += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            
-            customerCodes.push({
-                code: code,
-                used: false,
-                generatedAt: new Date().toISOString()
-            });
-            
-            localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
-            
-            document.getElementById('generatedCode').textContent = code;
-            document.getElementById('generatedCode').classList.remove('hidden');
-            
-            alert(`تم توليد الكود: ${code}\nسيتم حذف هذا الكود تلقائياً بعد 7 أيام.`);
-        }
-
-        // نشر منشور كأدمن
-        function publishPostAsAdmin() {
-            const title = document.getElementById('postTitle').value;
-            const description = document.getElementById('postDescription').value;
-            const category = document.getElementById('postCategory').value;
-            const keywords = document.getElementById('postKeywords').value.split(',').map(k => k.trim());
-            
-            if (!title || !description) {
-                alert('يرجى ملء جميع الحقول المطلوبة!');
-                return;
-            }
-            
-            const newPost = {
-                id: posts.length + 1,
-                title: title,
-                description: description,
-                category: category,
-                keywords: keywords,
-                media: [],
-                date: new Date().toISOString().split('T')[0],
-                author: 'admin'
-            };
-            
-            posts.push(newPost);
-            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
-            
-            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
-            if (activeTab === category) {
-                loadPostsByCategory(activeTab);
-            }
-            
-            // إعادة تعيين النموذج
-            document.getElementById('postTitle').value = '';
-            document.getElementById('postDescription').value = '';
-            document.getElementById('postKeywords').value = '';
-            
-            alert('تم نشر المنشور بنجاح!');
-            updateAdminStats();
-        }
-
-        // رفع إعلان
-        function uploadAd() {
-            const adType = document.getElementById('adType').value;
-            const adFile = document.getElementById('adFile').files[0];
-            
-            if (!adFile) {
-                alert('يرجى اختيار ملف للإعلان!');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const newAd = {
-                    id: ads.length + 1,
-                    type: adType,
-                    content: e.target.result,
-                    duration: adType === 'image' ? 5 : 24,
-                    uploadedAt: new Date().toISOString()
-                };
-                
-                ads.push(newAd);
-                localStorage.setItem('worldLibraryAds', JSON.stringify(ads));
-                
-                alert('تم رفع الإعلان بنجاح!');
-                document.getElementById('adFile').value = '';
-            };
-            
-            reader.readAsDataURL(adFile);
-        }
-
-        // التحقق من كود العميل
-        function verifyCustomerCode() {
-            const code = document.getElementById('customerCode').value.trim().toUpperCase();
-            const validCode = customerCodes.find(c => c.code === code && !c.used);
-            
-            if (validCode) {
-                document.getElementById('customerCodeSection').classList.add('hidden');
-                document.getElementById('customerPostForm').classList.remove('hidden');
-            } else {
-                alert('الكود غير صحيح أو已被使用!');
-            }
-        }
-
-        // نشر منشور كعميل
-        function publishPostAsCustomer() {
-            const title = document.getElementById('customerPostTitle').value;
-            const description = document.getElementById('customerPostDescription').value;
-            const category = document.getElementById('customerPostCategory').value;
-            const keywords = document.getElementById('customerPostKeywords').value.split(',').map(k => k.trim());
-            const code = document.getElementById('customerCode').value.trim().toUpperCase();
-            
-            if (!title || !description) {
-                alert('يرجى ملء جميع الحقول المطلوبة!');
-                return;
-            }
-            
-            const newPost = {
-                id: posts.length + 1,
-                title: title,
-                description: description,
-                category: category,
-                keywords: keywords,
-                media: [],
-                date: new Date().toISOString().split('T')[0],
-                author: 'customer'
-            };
-            
-            posts.push(newPost);
-            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
-            
-            // تعليم الكود كمستخدم
-            const codeIndex = customerCodes.findIndex(c => c.code === code);
-            if (codeIndex !== -1) {
-                customerCodes[codeIndex].used = true;
-                customerCodes[codeIndex].usedAt = new Date().toISOString();
-                localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
-            }
-            
-            // إغلاق النافذة وإعادة التعيين
-            document.getElementById('customerAreaModal').classList.add('hidden');
-            resetCustomerForm();
-            
-            alert('تم نشر المنشور بنجاح! سيبقى المنشور لمدة 7 أيام.');
-            
-            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
-            if (activeTab === category) {
-                loadPostsByCategory(activeTab);
-            }
-        }
-
-        // إعادة تعيين نموذج العميل
-        function resetCustomerForm() {
-            document.getElementById('customerCode').value = '';
-            document.getElementById('customerPostTitle').value = '';
-            document.getElementById('customerPostDescription').value = '';
-            document.getElementById('customerPostKeywords').value = '';
-            document.getElementById('customerPostMedia').value = '';
-            
-            document.getElementById('customerCodeSection').classList.remove('hidden');
-            document.getElementById('customerPostForm').classList.add('hidden');
-        }
-
-        // عرض إعلان عشوائي
-        function showRandomAd() {
-            if (ads.length === 0) return;
-            
-            const randomAd = ads[Math.floor(Math.random() * ads.length)];
-            currentAd = randomAd;
-            
-            const adModal = document.getElementById('adModal');
-            const adContent = document.getElementById('adContent');
-            const adTimer = document.getElementById('adTimer');
-            
-            if (randomAd.type === 'image') {
-                adContent.innerHTML = `<img src="${randomAd.content}" alt="إعلان" class="w-full h-auto">`;
-            } else {
-                adContent.innerHTML = `
-                    <video controls autoplay class="w-full h-auto">
-                        <source src="${randomAd.content}" type="video/mp4">
-                        متصفحك لا يدعم تشغيل الفيديو.
-                    </video>
-                `;
-            }
-            
-            adModal.classList.remove('hidden');
-            
-            let secondsLeft = randomAd.duration;
-            adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
-            
-            adInterval = setInterval(() => {
-                secondsLeft--;
-                adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
-                
-                if (secondsLeft <= 0) {
-                    clearInterval(adInterval);
-                    adModal.classList.add('hidden');
-                    
-                    // منح المستخدم صلاحية استخدام الموقع لمدة 24 ساعة
-                    const accessUntil = new Date();
-                    accessUntil.setHours(accessUntil.getHours() + 24);
-                    localStorage.setItem('worldLibraryAccessUntil', accessUntil.toISOString());
-                    
-                    alert('تم تفعيل استخدام الموقع لمدة 24 ساعة!');
-                }
-            }, 1000);
-        }
-    </script>
-</body>
-                              </html>
