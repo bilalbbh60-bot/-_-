@@ -1,135 +1,224 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>مكتبة العالم — Demo</title>
-  <style>
-    :root{ --bg:#071030; --card:#0f172a; --accent1:#06b6d4; --accent2:#7c3aed; color-scheme: dark; }
-    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,"Noto Naskh Arabic",sans-serif;background:linear-gradient(180deg,var(--bg),#021029);color:#e6eef8}
-    .wrap{max-width:1100px;margin:18px auto;padding:18px;}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{font-size:22px;margin:0}
-    .tabs{display:flex;gap:8px;overflow:auto;padding:8px 0}
-    .tab{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.06);cursor:pointer;white-space:nowrap}
-    .tab.active{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
-    .search{margin-top:12px;display:flex;gap:8px}
-    input[type="text"]{flex:1;padding:8px;border-radius:10px;border:0;background:#0b1220;color:inherit}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:14px}
-    .card{background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.4)}
-    .card img, .card video{width:100%;border-radius:8px;margin-top:8px}
-    footer{margin-top:20px;text-align:center;color:#9fb3d6;font-size:13px}
-    button.btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:0;color:#001;padding:8px 12px;border-radius:10px;cursor:pointer}
-    /* Admin modal */
-    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6)}
-    .panel{width:94%;max-width:760px;background:linear-gradient(180deg,#071330,#071a36);padding:18px;border-radius:14px}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    label{font-size:13px;color:#9fb3d6}
-    small.tip{color:#9fb3d6;font-size:12px}
-    .promo{background:#081226;padding:10px;border-radius:10px;margin-top:8px}
-    .fade{transition:all .28s ease}
-    .emoji{font-size:18px;margin-left:6px}
-    .compare-table{width:100%;border-collapse:collapse}
-    .compare-table th,.compare-table td{border:1px solid rgba(255,255,255,0.06);padding:8px;text-align:center}
-    .muted{color:#9fb3d6;font-size:13px}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>مكتبة العالم — واجهة احترافية</title>
+
+<!-- Tailwind via CDN for rapid nice UI -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  /* Extra styling and small animations */
+  body { background: linear-gradient(180deg,#071030,#021029); color: #e6eef8; font-family: Inter, system-ui, "Noto Naskh Arabic", sans-serif; }
+  .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.04); }
+  .tab-scroll { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-scroll::-webkit-scrollbar { display: none; }
+  .fade { transition: all .22s ease; }
+  .btn-accent { background: linear-gradient(90deg,#06b6d4,#7c3aed); color:#001; }
+  .small-muted { color:#9fb3d6; font-size:13px; }
+  .ad-overlay { position: fixed; inset:0; display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6); z-index:60; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>📚 مكتبة العالم</h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="btnCompare" class="btn">مقارنة الهواتف</button>
-        <button id="openAdmin" class="btn">⋮</button>
-      </div>
-    </header>
 
-    <nav class="tabs" id="tabs"></nav>
+<div class="max-w-6xl mx-auto p-4 md:p-8">
+  <!-- Header -->
+  <header class="flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-4xl font-extrabold">📚 مكتبة العالم</h1>
+      <p class="small-muted">مكتبة متعددة الأقسام — واجهة تفاعلية ومميزة</p>
+    </div>
 
-    <form id="searchForm" class="search">
-      <input id="kw" type="text" placeholder="ادخل كلمات مفتاحية (مثال: رياضة,تمارين)" />
-      <button class="btn" type="submit">🔎 بحث</button>
-      <button class="btn" id="btnNewPost" type="button">➕ نشر (ADM/كود)</button>
-      <button class="btn" id="payBtn" type="button">انشر 7 أيام بـ $3</button>
+    <div class="flex items-center gap-3">
+      <button id="customerAreaBtn" class="px-3 py-2 rounded-full btn-accent shadow">مساحة الزبون</button>
+      <button id="openAdmin" class="px-3 py-2 rounded-full glass border btn-accent">⋮</button>
+    </div>
+  </header>
+
+  <!-- Tabs (scrollable) -->
+  <section class="mt-6">
+    <div class="tab-scroll flex gap-3 overflow-x-auto py-2">
+      <!-- Tabs injected by JS -->
+    </div>
+  </section>
+
+  <!-- Search + actions -->
+  <section class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+    <form id="searchForm" class="col-span-2 flex gap-2">
+      <input id="kw" class="flex-1 p-3 rounded-lg glass border placeholder:text-slate-400" placeholder="ابحث بالكلمات المفتاحية داخل الخانة الحالية (مثال: رياضة, تمارين)" />
+      <button type="submit" class="px-4 rounded-lg btn-accent">🔎 بحث</button>
     </form>
 
-    <section id="content" class="grid"></section>
+    <div class="flex gap-2 justify-end">
+      <button id="newPostBtn" class="px-4 py-2 rounded-lg glass">➕ نشر (ADM/كود)</button>
+      <button id="promoteBtn" class="px-4 py-2 rounded-lg btn-accent">انشر 7 أيام بـ $3</button>
+    </div>
+  </section>
 
-    <div id="compareView" style="display:none;margin-top:18px" class="card">
-      <h3>📱 مقارنة الهواتف</h3>
-      <table class="compare-table" id="compareTable">
-        <thead><tr><th>هاتف</th><th>رام</th><th>التخزين</th><th>البطارية</th></tr></thead>
-        <tbody></tbody>
+  <!-- Content grid -->
+  <main class="mt-6">
+    <div id="content" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+    <div id="compareView" class="mt-6 glass p-4 rounded-lg hidden">
+      <h3 class="font-bold">📱 مقارنة الهواتف</h3>
+      <table class="w-full mt-3 text-center">
+        <thead><tr class="text-sm text-slate-300"><th class="p-2">الهاتف</th><th class="p-2">الرام</th><th class="p-2">التخزين</th><th class="p-2">البطارية</th></tr></thead>
+        <tbody id="compareTable"></tbody>
       </table>
-      <p class="muted">يمكنك تعديل المواصفات في الكود لاحقاً أو جلبها من API.</p>
+    </div>
+  </main>
+
+  <footer class="mt-8 small-muted text-center">
+    رفع على GitHub Pages — الملف: <code>index.html</code>
+  </footer>
+</div>
+
+<!-- Admin Modal -->
+<div id="adminModal" class="fixed inset-0 hidden items-center justify-center z-50">
+  <div class="w-full max-w-2xl p-6 rounded-xl glass">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="font-bold text-lg">لوحة الأدمن ⚙️</h2>
+        <p class="small-muted">إدارة الأكواد، الإعلانات، ونشر يدوي.</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="shareFB" class="px-3 py-2 rounded-lg btn-accent">روج لإعلانك</button>
+        <button id="closeAdmin" class="px-3 py-2 rounded-lg glass">إغلاق</button>
+      </div>
     </div>
 
-    <footer>
-      صفحة تجريبية للعمل على GitHub Pages — لرفعها: ضع هذا الملف `index.html` في root المستودع وفعل GitHub Pages.<br>
-      زر روج لإعلانك يفتح حساب فيسبوك الذي أعطيتني رابطه.
-    </footer>
-  </div>
+    <hr class="my-4 border-slate-700">
 
-  <!-- Admin modal (hidden) -->
-  <div id="adminModal" class="modal" style="display:none">
-    <div class="panel fade">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div><strong>لوحة الادمن ⚙️</strong> <span class="emoji">🔐</span></div>
-        <div style="display:flex;gap:8px">
-          <button id="shareFB" class="btn">روج لإعلانك</button>
-          <button id="closeAdmin" class="btn">إغلاق</button>
-        </div>
+    <!-- Login / Setup -->
+    <div id="adminLoginBlock" class="">
+      <label class="small-muted">أدخل كلمة الأدمن (تُقارن داخلياً بهاش مخزن)</label>
+      <div class="mt-2 flex gap-2">
+        <input id="adminPass" type="password" class="flex-1 p-3 rounded-lg glass" placeholder="كلمة الأدمن" />
+        <button id="adminConfirm" class="px-4 py-2 rounded-lg btn-accent">دخول</button>
       </div>
+      <p class="small-muted mt-2">كلمة الأدمن ليست مُعرضة. إذا نسيت، يمكن إعادة تعيينها محلياً عبر console (غير مُستحسن بدون باك-اند).</p>
+    </div>
 
-      <div style="margin-top:12px">
-        <div id="loginBlock">
-          <label>أدخل كلمة الادمن</label>
-          <div class="row" style="margin-top:6px">
-            <input id="adminPass" type="password" placeholder="كلمة المرور" style="flex:1;padding:8px;border-radius:8px;border:0;background:#06121b;color:inherit" />
-            <button id="doLogin" class="btn">دخول</button>
+    <!-- Panel -->
+    <div id="adminPanelBlock" class="hidden mt-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="glass p-3 rounded-lg">
+          <div class="font-semibold">🔐 توليد كود</div>
+          <div class="mt-2 small-muted">كود صالح لمرة واحدة — أعطه للزبون.</div>
+          <div class="mt-3 flex gap-2">
+            <button id="genCode" class="px-3 py-2 rounded-lg btn-accent">توليد كود</button>
+            <button id="showCodes" class="px-3 py-2 rounded-lg glass">عرض الأكواد</button>
           </div>
-          <small class="tip">الملاحظة: كلمة المرور المطلوبة (مؤقتاً) هي <strong>2009bbh2009</strong></small>
         </div>
 
-        <div id="panelBlock" style="display:none;margin-top:12px">
-          <div class="row">
-            <button id="genCode" class="btn">توليد كود 7 أيام</button>
-            <button id="viewCodes" class="btn">عرض الأكواد</button>
-            <button id="closePanel" class="btn">تسجيل خروج</button>
-          </div>
-
-          <div class="promo" id="codesList" style="display:none"></div>
-
-          <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)" />
-
-          <h4>إنشاء منشور يدوي</h4>
-          <div style="margin-top:8px">
-            <label>العنوان</label>
-            <input id="pTitle" type="text" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit" />
-            <label>الوصف</label>
-            <textarea id="pDesc" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit"></textarea>
-            <label>كلمات مفتاحية (مفصولة بفواصل)</label>
-            <input id="pKw" type="text" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit" />
-            <label>اختر الخانة</label>
-            <select id="pCat" style="width:100%;padding:8px;border-radius:8px;background:#06121b;border:0;color:inherit;margin-top:6px">
+        <div class="glass p-3 rounded-lg">
+          <div class="font-semibold">📣 رفع إعلان</div>
+          <div class="mt-2 small-muted">يمكن رفع صورة/فيديو لإظهارها للزوار (مشاهدة مقطوعة قبل الاستخدام).</div>
+          <input id="adFile" type="file" class="mt-2" />
+          <div class="mt-2 flex gap-2">
+            <select id="adType" class="p-2 rounded-lg glass">
+              <option value="video">فيديو (24 ثانية)</option>
+              <option value="image">صورة (5 ثواني)</option>
             </select>
-            <label>صور/فيديو (من جهازك)</label>
-            <input type="file" id="pFiles" multiple style="margin-top:6px" />
-            <div style="margin-top:8px;display:flex;gap:8px">
-              <button id="publishBtn" class="btn">نشر الآن</button>
-              <button id="publishWithCodeBtn" class="btn">نشر باستخدام كود</button>
-            </div>
+            <button id="uploadAd" class="px-3 py-2 rounded-lg btn-accent">رفع</button>
+          </div>
+        </div>
+
+        <div class="glass p-3 rounded-lg">
+          <div class="font-semibold">📊 الإحصاءات</div>
+          <div class="mt-2 small-muted">بيانات محفوظة محلياً (localStorage).</div>
+          <div class="mt-3 space-y-2">
+            <div class="flex justify-between"><span>👥 إجمالي زوار</span><span id="statTotal" class="font-semibold">0</span></div>
+            <div class="flex justify-between"><span>🔗 من فيسبوك</span><span id="statFB" class="font-semibold">0</span></div>
+            <div class="flex justify-between"><span>🌍 مباشرة</span><span id="statDirect" class="font-semibold">0</span></div>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="muted">ملحوظة: المنشورات تحفظ محلياً وستبقى في متصفحك حتى تحذفها أو تنتهي صلاحيتها (7 أيام).</div>
+      <div id="codesBox" class="mt-4 glass p-3 rounded-lg hidden"></div>
+
+      <hr class="my-4 border-slate-700" />
+
+      <div>
+        <h3 class="font-semibold">نشر يدوي (الأدمن)</h3>
+        <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input id="pTitle" placeholder="عنوان" class="p-3 rounded-lg glass" />
+          <input id="pKw" placeholder="كلمات مفتاحية (مفصولة بفواصل)" class="p-3 rounded-lg glass" />
+          <textarea id="pDesc" placeholder="وصف" class="p-3 rounded-lg glass col-span-2"></textarea>
+          <select id="pCat" class="p-3 rounded-lg glass">
+            <!-- filled by JS -->
+          </select>
+          <input id="pFiles" type="file" multiple class="col-span-2" />
+          <div class="col-span-2 flex gap-2">
+            <button id="publishNow" class="px-4 py-2 rounded-lg btn-accent">نشر الآن</button>
+            <button id="logoutAdmin" class="px-4 py-2 rounded-lg glass">تسجيل خروج</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- Customer area modal -->
+<div id="customerModal" class="fixed inset-0 hidden items-center justify-center z-40">
+  <div class="w-full max-w-xl p-6 rounded-xl glass">
+    <div class="flex justify-between">
+      <h3 class="font-bold">مساحة الزبون</h3>
+      <button id="closeCustomer" class="px-3 py-1 rounded-lg glass">إغلاق</button>
+    </div>
+
+    <div class="mt-3">
+      <label class="small-muted">أدخل كود النشر الذي استلمته</label>
+      <div class="flex gap-2 mt-2">
+        <input id="customerCode" class="flex-1 p-3 rounded-lg glass" placeholder="ادخل الكود" />
+        <button id="redeemCode" class="px-3 py-2 rounded-lg btn-accent">تحقق</button>
+      </div>
+
+      <div id="customerFormWrap" class="mt-4 hidden">
+        <p class="small-muted">الكود صحيح — يمكنك الآن نشر منشور واحد فقط.</p>
+        <input id="custTitle" placeholder="العنوان" class="p-3 rounded-lg glass mt-2" />
+        <input id="custKw" placeholder="كلمات مفتاحية" class="p-3 rounded-lg glass mt-2" />
+        <textarea id="custDesc" placeholder="الوصف" class="p-3 rounded-lg glass mt-2"></textarea>
+        <select id="custCat" class="p-3 rounded-lg glass mt-2">
+          <!-- filled by JS -->
+        </select>
+        <input id="custFiles" type="file" multiple class="mt-2" />
+        <div class="mt-3 flex gap-2">
+          <button id="custPublish" class="px-4 py-2 rounded-lg btn-accent">نشر المنشور</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ad Modal -->
+<div id="adModal" class="hidden ad-overlay">
+  <div id="adHolder" class="w-full max-w-3xl p-4 rounded-lg glass"></div>
+</div>
 
 <script>
-/* ====== App data & helpers (client-only demo) ====== */
-const FB_LINK = "https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v";
+/* -------------------------
+   Core client-only implementation
+   ------------------------- */
+
+/* Precomputed sha256( '2009bbh2009' ) stored as ADMIN_HASH (we do not display password) */
+const ADMIN_HASH = "5116bd58b6757e5a6d5396543a8c10d55a0ca3cb44d3dd1503c6ac5ae74b34f6";
+
+/* Utility helpers */
+function uid(){ return Math.random().toString(36).slice(2,9) }
+function now(){ return Date.now() }
+function save(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+function load(k, fallback){ try{ const v = JSON.parse(localStorage.getItem(k)); return v===null? fallback : (v||fallback); }catch(e){ return fallback } }
+
+/* Data stores in localStorage:
+   m_posts: array of posts
+   m_codes: array of {code, days, createdAt, used:false}
+   m_ad: {type, data, length}
+   visitors: numbers
+*/
+
+/* Default categories */
 const CATEGORIES = [
   { key:'media', title:'وسائل الإعلام الآلي' },
   { key:'electronics', title:'الأجهزة الكهرو منزلية' },
@@ -138,215 +227,328 @@ const CATEGORIES = [
   { key:'phones', title:'مقارنة الهواتف' }
 ];
 
-function uid(){ return Math.random().toString(36).slice(2,9) }
-function now(){ return Date.now() }
-function savePosts(list){ localStorage.setItem('m_posts', JSON.stringify(list)) }
-function loadPosts(){ try { return JSON.parse(localStorage.getItem('m_posts')||'[]') } catch(e){ return [] } }
-function saveCodes(c){ localStorage.setItem('m_codes', JSON.stringify(c)) }
-function loadCodes(){ try { return JSON.parse(localStorage.getItem('m_codes')||'[]') } catch(e){ return [] } }
-
-/* delete expired posts on load */
-function cleanupExpired(){
-  const arr = loadPosts().filter(p => !p.expiresAt || p.expiresAt > now())
-  savePosts(arr)
-}
-cleanupExpired()
-
-/* ====== Build UI ====== */
-const tabsEl = document.getElementById('tabs')
-const content = document.getElementById('content')
-const compareView = document.getElementById('compareView')
-const compareTableBody = document.querySelector('#compareTable tbody')
-
-// render tabs
-let active = CATEGORIES[0].key
-CATEGORIES.forEach(c=>{
-  const b = document.createElement('button')
-  b.className = 'tab fade' + (c.key===active? ' active':'')
-  b.textContent = c.title
-  b.onclick = ()=>{ setActive(c.key) }
-  tabsEl.appendChild(b)
-})
-
-// fill admin category select
-const pCat = document.getElementById('pCat')
-CATEGORIES.filter(x=>x.key!=='phones').forEach(c=>{
-  const o = document.createElement('option'); o.value=c.key; o.textContent=c.title; pCat.appendChild(o)
-})
-
-function setActive(k){
-  active = k
-  Array.from(tabsEl.children).forEach(btn=> btn.classList.toggle('active', btn.textContent===CATEGORIES.find(x=>x.key===k).title))
-  document.getElementById('kw').value = ''
-  render()
-  if(k==='phones'){ document.getElementById('compareView').style.display='block'; content.style.display='none' }
-  else{ document.getElementById('compareView').style.display='none'; content.style.display='grid' }
+/* Simple SHA-256 hex function */
+async function sha256hex(str){
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-/* ====== Render posts ====== */
-function render(){
-  if(active==='phones'){ renderCompare(); return }
-  const all = loadPosts().filter(p => p.categoryKey === active)
-  const grid = content
-  grid.innerHTML = ''
-  if(all.length===0){ grid.innerHTML = '<div class="muted">لا توجد منشورات في هذه الخانة بعد.</div>'; return }
-  all.sort((a,b)=>b.createdAt - a.createdAt)
-  all.forEach(p=>{
-    const d = document.createElement('article'); d.className = 'card fade'
-    d.innerHTML = `<div class="muted">${p.categoryKey} • ${new Date(p.createdAt).toLocaleString()}</div>
-      <h3 style="margin:8px 0;font-weight:700">${escapeHtml(p.title)} <span class="emoji">✨</span></h3>
-      <p>${escapeHtml(p.description).slice(0,200)}</p>`
+/* Initialize minimal demo posts if empty */
+if(!load('m_posts', null)) {
+  save('m_posts', [
+    { _id: uid(), title:'نصائح رياضية صباحية', description:'تمارين بسيطة لبدء اليوم', media:[], link:'', categoryKey:'health', keywords:['رياضة','تمارين'], createdAt: now(), expiresAt: now() + 7*24*3600*1000 },
+    { _id: uid(), title:'مراجعة سريعة لهاتف', description:'مميزات وأداء', media:[], link:'', categoryKey:'media', keywords:['مراجعة','هاتف'], createdAt: now(), expiresAt: now() + 7*24*3600*1000 }
+  ]);
+}
+
+/* Visit tracking (local-only) */
+(function trackVisit(){
+  const total = (parseInt(localStorage.getItem('vis_total')||'0') + 1);
+  localStorage.setItem('vis_total', total);
+  const ref = document.referrer || '';
+  if(ref.includes('facebook.com')) {
+    localStorage.setItem('vis_fb', (parseInt(localStorage.getItem('vis_fb')||'0')+1));
+  } else {
+    localStorage.setItem('vis_direct', (parseInt(localStorage.getItem('vis_direct')||'0')+1));
+  }
+})();
+
+/* UI elements */
+const tabsContainer = document.querySelector('.tab-scroll');
+const content = document.getElementById('content');
+const compareView = document.getElementById('compareView');
+const compareTable = document.getElementById('compareTable');
+
+/* build tabs */
+let active = 'media';
+function buildTabs(){
+  tabsContainer.innerHTML = '';
+  CATEGORIES.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'px-4 py-2 rounded-full glass fade tab-btn';
+    btn.textContent = cat.title;
+    btn.addEventListener('click', ()=> setActive(cat.key));
+    if(cat.key === active) btn.classList.add('btn-accent');
+    tabsContainer.appendChild(btn);
+  });
+}
+buildTabs();
+
+/* setActive */
+function setActive(key){
+  active = key;
+  Array.from(tabsContainer.children).forEach(b=>{
+    b.classList.toggle('btn-accent', b.textContent === CATEGORIES.find(c=>c.key===key).title);
+  });
+  document.getElementById('kw').value = '';
+  if(key === 'phones'){
+    compareView.classList.remove('hidden');
+    content.classList.add('hidden');
+    renderCompare();
+  } else {
+    compareView.classList.add('hidden');
+    content.classList.remove('hidden');
+    renderPosts();
+  }
+}
+
+/* render posts for active category */
+function renderPosts(){
+  const posts = (load('m_posts',[])||[]).filter(p=> p.categoryKey === active && (!p.expiresAt || p.expiresAt > now()));
+  content.innerHTML = '';
+  if(posts.length === 0){
+    content.innerHTML = `<div class="col-span-full glass p-6 rounded-lg text-center small-muted">لا توجد منشورات في هذه الخانة بعد.</div>`;
+    return;
+  }
+  posts.sort((a,b)=>b.createdAt - a.createdAt);
+  posts.forEach(p=>{
+    const card = document.createElement('article');
+    card.className = 'glass p-4 rounded-lg';
+    let inner = `<div class="small-muted">${escapeHtml(p.categoryKey)} • ${new Date(p.createdAt).toLocaleString()}</div>
+                 <h3 class="font-bold mt-2">${escapeHtml(p.title)} <span class="ml-2">✨</span></h3>
+                 <p class="mt-2 small-muted">${escapeHtml(p.description).slice(0,160)}</p>`;
     if(p.media && p.media.length){
-      const m = p.media[0]
-      if(m.type.startsWith('image')){ const img = document.createElement('img'); img.src = m.url; d.appendChild(img) }
-      else if(m.type.startsWith('video')){ const v = document.createElement('video'); v.controls=true; v.src = m.url; d.appendChild(v) }
+      const m = p.media[0];
+      if(m.type.startsWith('image')) inner += `<img src="${m.url}" alt="" class="mt-3 rounded-lg w-full" />`;
+      else if(m.type.startsWith('video')) inner += `<video src="${m.url}" controls class="mt-3 rounded-lg w-full"></video>`;
     }
-    grid.appendChild(d)
-  })
+    card.innerHTML = inner;
+    content.appendChild(card);
+  });
 }
 
-/* simple escape */
-function escapeHtml(s){ return (s||'').toString().replaceAll('<','&lt;').replaceAll('>','&gt;') }
-
-/* search */
-document.getElementById('searchForm').addEventListener('submit', e=>{
-  e.preventDefault()
-  const q = document.getElementById('kw').value.trim()
-  if(!q){ render(); return }
-  const arr = loadPosts().filter(p => p.categoryKey === active && (p.keywords||[]).some(k=> k.includes(q) || q.includes(k) || p.title.includes(q) || p.description.includes(q)))
-  content.innerHTML = ''
-  if(arr.length===0){ content.innerHTML = '<div class="muted">لا توجد نتائج مطابقة.</div>'; return }
-  arr.forEach(p=>{
-    const d = document.createElement('article'); d.className='card fade'
-    d.innerHTML = `<div class="muted">${p.categoryKey} • ${new Date(p.createdAt).toLocaleString()}</div>
-      <h3 style="margin:8px 0;font-weight:700">${escapeHtml(p.title)} <span class="emoji">🔎</span></h3>
-      <p>${escapeHtml(p.description)}</p>`
-    content.appendChild(d)
-  })
-})
-
-/* compare view */
+/* compare */
 function renderCompare(){
-  compareTableBody.innerHTML = ''
+  compareTable.innerHTML = '';
   const data = [
     { name:'iPhone 15', ram:'6GB', storage:'128GB', battery:'4000mAh' },
     { name:'Samsung S24', ram:'12GB', storage:'256GB', battery:'5000mAh' }
-  ]
+  ];
   data.forEach(d=>{
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${d.name}</td><td>${d.ram}</td><td>${d.storage}</td><td>${d.battery}</td>`
-    compareTableBody.appendChild(tr)
-  })
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="p-2">${d.name}</td><td class="p-2">${d.ram}</td><td class="p-2">${d.storage}</td><td class="p-2">${d.battery}</td>`;
+    compareTable.appendChild(tr);
+  });
 }
 
-/* New post button -> open admin modal if not logged */
-document.getElementById('btnNewPost').addEventListener('click', ()=> openAdmin())
+/* search (keywords-first) */
+document.getElementById('searchForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const q = document.getElementById('kw').value.trim().toLowerCase();
+  if(!q){ renderPosts(); return; }
+  const posts = (load('m_posts',[])||[]).filter(p=> p.categoryKey === active && (
+    (p.keywords||[]).some(k=> k.toLowerCase().includes(q)) ||
+    (p.title||'').toLowerCase().includes(q) ||
+    (p.description||'').toLowerCase().includes(q)
+  ));
+  content.innerHTML = '';
+  if(posts.length===0){ content.innerHTML = `<div class="glass p-6 rounded-lg small-muted text-center">لا توجد نتائج مطابقة.</div>`; return; }
+  posts.forEach(p=>{
+    const card = document.createElement('article'); card.className = 'glass p-4 rounded-lg';
+    card.innerHTML = `<div class="small-muted">${escapeHtml(p.categoryKey)}</div><h3 class="font-bold">${escapeHtml(p.title)}</h3><p class="small-muted">${escapeHtml(p.description)}</p>`;
+    content.appendChild(card);
+  });
+});
 
-/* pay button -> redirect to your FB link (as you requested) */
-document.getElementById('payBtn').addEventListener('click', ()=>{
-  // redirect to facebook (where you said you'll receive payment/contact)
-  window.open(FB_LINK, '_blank')
-})
+/* escape helper */
+function escapeHtml(s){ return (s||'').toString().replaceAll('<','&lt;').replaceAll('>','&gt;') }
 
-/* admin modal logic */
-const adminModal = document.getElementById('adminModal')
-const loginBlock = document.getElementById('loginBlock')
-const panelBlock = document.getElementById('panelBlock')
-const adminPassInput = document.getElementById('adminPass')
-document.getElementById('openAdmin').onclick = openAdmin
-document.getElementById('closeAdmin').onclick = ()=>{ adminModal.style.display='none' }
-document.getElementById('shareFB').onclick = ()=> window.open(FB_LINK,'_blank')
+/* Buttons wiring */
+document.getElementById('openAdmin').addEventListener('click', ()=> { document.getElementById('adminModal').classList.remove('hidden'); });
+document.getElementById('closeAdmin').addEventListener('click', ()=> { document.getElementById('adminModal').classList.add('hidden'); });
+document.getElementById('newPostBtn').addEventListener('click', ()=> { document.getElementById('customerModal').classList.remove('hidden'); });
+document.getElementById('closeCustomer').addEventListener('click', ()=> { document.getElementById('customerModal').classList.add('hidden'); });
+document.getElementById('promoteBtn').addEventListener('click', ()=> { window.open("https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v",'_blank'); });
+document.getElementById('shareFB').addEventListener('click', ()=> { window.open("https://www.facebook.com/profile.php?id=61580406166615&mibextid=rS40aB7S9Ucbxw6v",'_blank'); });
 
-function openAdmin(){
-  adminModal.style.display = 'flex'
-  loginBlock.style.display = 'block'
-  panelBlock.style.display = 'none'
+/* Populate category selects */
+function fillCatSelects(){
+  const pCat = document.getElementById('pCat');
+  const custCat = document.getElementById('custCat');
+  pCat.innerHTML = ''; custCat.innerHTML = '';
+  CATEGORIES.filter(c=>c.key!=='phones').forEach(c=>{
+    const o = document.createElement('option'); o.value=c.key; o.textContent=c.title;
+    pCat.appendChild(o);
+    const o2 = o.cloneNode(true); custCat.appendChild(o2);
+  });
 }
+fillCatSelects();
 
-/* admin login: password is 2009bbh2009 (client-side demo) */
-document.getElementById('doLogin').addEventListener('click', ()=>{
-  const v = adminPassInput.value
-  if(v === '2009bbh2009'){
-    loginBlock.style.display='none'
-    panelBlock.style.display='block'
-    adminPassInput.value = ''
-    render()
-  } else alert('خطأ في كلمة المرور')
-})
-
-/* generate promo code */
-document.getElementById('genCode').addEventListener('click', ()=>{
-  const codes = loadCodes()
-  const code = 'MK' + Math.random().toString(36).slice(2,8).toUpperCase()
-  codes.push({ code, days:7, createdAt: now(), used:false })
-  saveCodes(codes)
-  alert('تولد كود: ' + code + '\\nاعطه للمستخدم ليستخدمه في صفحة الإدخال.')
-  showCodes()
-})
-document.getElementById('viewCodes').addEventListener('click', showCodes)
-function showCodes(){
-  const box = document.getElementById('codesList'); box.style.display='block'
-  const codes = loadCodes()
-  box.innerHTML = '<strong>الأكواد المولدة:</strong><br/>' + codes.map(c=>`<div style="padding:6px;border-radius:8px;margin-top:6px;background:#001323">${c.code} — ${c.days} يوم — ${c.used? 'مستخدم':''}</div>`).join('')
-}
-
-/* generate post from admin form */
-document.getElementById('publishBtn').addEventListener('click', async ()=>{
-  const title = document.getElementById('pTitle').value.trim()
-  const desc = document.getElementById('pDesc').value.trim()
-  const kws = document.getElementById('pKw').value.split(',').map(s=>s.trim()).filter(Boolean)
-  const cat = document.getElementById('pCat').value
-  const files = document.getElementById('pFiles').files
-  if(!title){ alert('ضع عنوان') ; return }
-  const media = []
-  for(const f of files){
-    const data = await fileToDataURL(f)
-    media.push({ url:data, type:f.type })
+/* Admin login (compare SHA-256 to precomputed hash) */
+document.getElementById('adminConfirm').addEventListener('click', async ()=>{
+  const v = document.getElementById('adminPass').value.trim();
+  if(!v) return alert('أدخل كلمة الأدمن');
+  const hv = await sha256hex(v);
+  if(hv === ADMIN_HASH){
+    document.getElementById('adminLoginBlock').classList.add('hidden');
+    document.getElementById('adminPanelBlock').classList.remove('hidden');
+    document.getElementById('adminPass').value = '';
+    refreshStats();
+    renderPosts();
+    showCodesBox(false);
+  } else {
+    alert('كلمة مرور خاطئة');
   }
-  const posts = loadPosts()
-  const createdAt = now()
-  posts.push({ _id: uid(), title, description:desc, media, link:'', categoryKey:cat, keywords:kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 })
-  savePosts(posts)
-  alert('تم النشر محلياً ✅')
-  render()
-})
+});
 
-/* publish with code: prompt for code then allow publish (client-only check) */
-document.getElementById('publishWithCodeBtn').addEventListener('click', async ()=>{
-  const code = prompt('ضع كود النشر الذي حصلت عليه:')
-  if(!code) return
-  const codes = loadCodes()
-  const found = codes.find(c=>c.code === code && !c.used)
-  if(!found) return alert('الكود غير صحيح أو مستخدم')
-  // use it (mark used)
-  found.used = true
-  saveCodes(codes)
-  alert('الكود صالح — الآن املأ بيانات المنشور في النموذج ثم اضغط نشر الآن')
-})
+/* Logout admin */
+document.getElementById('logoutAdmin').addEventListener('click', ()=>{
+  document.getElementById('adminPanelBlock').classList.add('hidden');
+  document.getElementById('adminLoginBlock').classList.remove('hidden');
+});
 
-/* helper: file -> dataURL */
+/* Generate code (one-time) */
+document.getElementById('genCode').addEventListener('click', ()=>{
+  const codes = load('m_codes',[]);
+  const code = 'MK-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  codes.push({ code, days:7, createdAt: now(), used:false });
+  save('m_codes', codes);
+  alert('تولد كود: ' + code + '\nانسخه واهديه للزبون. صالح لمرة واحدة.');
+  showCodesBox(true);
+});
+
+/* Show codes list */
+document.getElementById('showCodes').addEventListener('click', ()=> showCodesBox(true));
+function showCodesBox(show){
+  const box = document.getElementById('codesBox');
+  const codes = load('m_codes',[]);
+  if(codes.length === 0) box.innerHTML = '<div class="small-muted">لا توجد أكواد مولدة بعد.</div>';
+  else box.innerHTML = `<div class="font-semibold">الأكواد المولدة (${codes.length})</div>` + codes.map(c=>`<div class="mt-2 p-2 glass rounded flex justify-between items-center"><div>${c.code} — ${c.used? '<span class="small-muted">مستخدم</span>':'<span class="font-semibold">متاح</span>'}</div><div><button class="copyBtn px-2 py-1 rounded glass" data-code="${c.code}">نسخ</button></div></div>`).join('');
+  box.classList.toggle('hidden', !show);
+  // attach copy handlers
+  box.querySelectorAll('.copyBtn').forEach(btn=> btn.addEventListener('click', ()=> {
+    navigator.clipboard?.writeText(btn.dataset.code).then(()=> alert('نسخ الكود إلى الحافظة'));
+  }));
+}
+
+/* Publish Now (admin) */
+document.getElementById('publishNow').addEventListener('click', async ()=>{
+  const title = document.getElementById('pTitle').value.trim();
+  const desc = document.getElementById('pDesc').value.trim();
+  const kws = document.getElementById('pKw').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const cat = document.getElementById('pCat').value;
+  const files = document.getElementById('pFiles').files;
+  if(!title) return alert('أدخل عنواناً');
+  const media = [];
+  for(const f of files) media.push({ url: await fileToDataURL(f), type: f.type });
+  const posts = load('m_posts',[]);
+  const createdAt = now();
+  posts.push({ _id: uid(), title, description: desc, media, link:'', categoryKey: cat, keywords: kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 });
+  save('m_posts', posts);
+  alert('تم النشر بنجاح');
+  document.getElementById('pTitle').value=''; document.getElementById('pDesc').value=''; document.getElementById('pKw').value=''; document.getElementById('pFiles').value='';
+  renderPosts();
+});
+
+/* Upload Ad */
+document.getElementById('uploadAd').addEventListener('click', async ()=>{
+  const f = document.getElementById('adFile').files[0];
+  const type = document.getElementById('adType').value;
+  if(!f) return alert('اختر ملف الإعلان');
+  const data = await fileToDataURL(f);
+  save('m_ad', { type, data, length: type==='video'?24:5 });
+  alert('تم رفع الإعلان محلياً.');
+});
+
+/* Show ad to user when needed */
+async function showAdIfNeeded(){
+  const ad = load('m_ad', null);
+  const access = parseInt(localStorage.getItem('adAccessUntil')||'0',10);
+  if(!ad) return;
+  if(access > now()) return;
+  // show modal
+  const adModal = document.getElementById('adModal');
+  const adHolder = document.getElementById('adHolder');
+  adHolder.innerHTML = '';
+  if(ad.type === 'video'){
+    const v = document.createElement('video'); v.src = ad.data; v.controls = true; v.autoplay = true; v.style.width = '100%';
+    adHolder.appendChild(v);
+    const info = document.createElement('div'); info.className = 'small-muted mt-2'; info.textContent = `شاهد ${ad.length} ثانية لتنشيط الموقع لمدة 24 ساعة.`;
+    adHolder.appendChild(info);
+    adModal.classList.remove('hidden');
+    const interval = setInterval(()=> {
+      try{
+        if(Math.floor(v.currentTime) >= ad.length){
+          clearInterval(interval);
+          adModal.classList.add('hidden');
+          localStorage.setItem('adAccessUntil', (now() + 24*3600*1000));
+          alert('تم تفعيل الموقع لمدة 24 ساعة بعد مشاهدة الإعلان.');
+        }
+      }catch(e){}
+    }, 500);
+  } else {
+    const img = document.createElement('img'); img.src = ad.data; img.style.width = '100%';
+    adHolder.appendChild(img);
+    adModal.classList.remove('hidden');
+    setTimeout(()=> { adModal.classList.add('hidden'); localStorage.setItem('adAccessUntil', (now() + 24*3600*1000)); alert('تم تفعيل الموقع لمدة 24 ساعة بعد مشاهدة الإعلان.'); }, 5000);
+  }
+}
+
+/* Customer: redeem code -> allow publish one */
+document.getElementById('redeemCode').addEventListener('click', ()=>{
+  const code = document.getElementById('customerCode').value.trim();
+  if(!code) return alert('أدخل الكود');
+  const codes = load('m_codes',[]);
+  const found = codes.find(c=> c.code === code && !c.used);
+  if(!found) return alert('الكود غير صحيح أو مستخدم');
+  // mark code temporarily as allocated to this customer session (not used until publish)
+  sessionStorage.setItem('allocated_code', code);
+  // show customer form
+  document.getElementById('customerFormWrap').classList.remove('hidden');
+});
+
+/* Customer publish */
+document.getElementById('custPublish').addEventListener('click', async ()=>{
+  const code = sessionStorage.getItem('allocated_code');
+  if(!code) return alert('لم يتم التحقق من الكود');
+  const title = document.getElementById('custTitle').value.trim();
+  const desc = document.getElementById('custDesc').value.trim();
+  const kws = document.getElementById('custKw').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const cat = document.getElementById('custCat').value;
+  const files = document.getElementById('custFiles').files;
+  if(!title) return alert('أدخل عنوان');
+  const media = [];
+  for(const f of files) media.push({ url: await fileToDataURL(f), type: f.type });
+  const posts = load('m_posts',[]);
+  const createdAt = now();
+  posts.push({ _id: uid(), title, description: desc, media, link:'', categoryKey: cat, keywords: kws, createdAt, expiresAt: createdAt + 7*24*3600*1000 });
+  save('m_posts', posts);
+  // mark code used
+  const codes = load('m_codes',[]);
+  const idx = codes.findIndex(c=>c.code === code);
+  if(idx>=0){ codes[idx].used = true; codes[idx].usedAt = now(); save('m_codes', codes); }
+  // prevent reuse: clear session allocation
+  sessionStorage.removeItem('allocated_code');
+  alert('نشر المنشور بنجاح — الكود أصبح مستخدماً.');
+  document.getElementById('customerModal').classList.add('hidden');
+  // refresh
+  renderPosts();
+});
+
+/* Helpers: file -> dataURL */
 function fileToDataURL(file){
   return new Promise((res,rej)=>{
-    const r = new FileReader()
-    r.onload = ()=> res(r.result)
-    r.onerror = rej
-    r.readAsDataURL(file)
-  })
+    const r = new FileReader();
+    r.onload = ()=> res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
 }
 
-/* logout / close panel */
-document.getElementById('closePanel').addEventListener('click', ()=>{
-  adminModal.style.display='none'
-  loginBlock.style.display='block'
-  panelBlock.style.display='none'
-})
+/* Utility show stats */
+function refreshStats(){
+  document.getElementById('statTotal').textContent = localStorage.getItem('vis_total') || 0;
+  document.getElementById('statFB').textContent = localStorage.getItem('vis_fb') || 0;
+  document.getElementById('statDirect').textContent = localStorage.getItem('vis_direct') || 0;
+}
 
-/* quick open FB from footer */
-document.getElementById('btnCompare').addEventListener('click', ()=> setActive('phones'))
+/* show ad on load if needed */
+showAdIfNeeded();
+refreshStats();
+setActive(active);
+renderPosts();
 
-/* initial render */
-setActive(active)
-render()
 </script>
 </body>
-</html>
+                </html>
