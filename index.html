@@ -810,3 +810,255 @@
         }
 
         // تحديث إحصائيات الأدمن
+        function updateAdminStats() {
+            document.getElementById('totalVisitors').textContent = localStorage.getItem('worldLibraryVisitors') || 0;
+            document.getElementById('totalPosts').textContent = posts.length;
+            document.getElementById('usedCodes').textContent = customerCodes.filter(code => code.used).length;
+        }
+
+        // توليد كود للعميل
+        function generateCustomerCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            
+            for (let i = 0; i < 8; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            // تاريخ انتهاء الصلاحية بعد 7 أيام
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+            
+            customerCodes.push({
+                code: code,
+                used: false,
+                generatedAt: new Date().toISOString(),
+                expiresAt: expiresAt.toISOString()
+            });
+            
+            localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
+            
+            document.getElementById('generatedCode').textContent = code;
+            document.getElementById('generatedCode').classList.remove('hidden');
+            
+            alert(`تم توليد الكود: ${code}\nهذا الكود صالح لمرة واحدة فقط وسينتهي في ${expiresAt.toLocaleDateString('ar-EG')}`);
+        }
+
+        // نشر منشور كأدمن
+        function publishPostAsAdmin() {
+            const title = document.getElementById('postTitle').value;
+            const description = document.getElementById('postDescription').value;
+            const category = document.getElementById('postCategory').value;
+            const keywords = document.getElementById('postKeywords').value.split(',').map(k => k.trim());
+            
+            if (!title || !description) {
+                alert('يرجى ملء جميع الحقول المطلوبة!');
+                return;
+            }
+            
+            const newPost = {
+                id: posts.length + 1,
+                title: title,
+                description: description,
+                category: category,
+                keywords: keywords,
+                media: [],
+                date: new Date().toISOString().split('T')[0],
+                author: 'admin',
+                expiresAt: null // منشورات الأدمن لا تنتهي
+            };
+            
+            posts.push(newPost);
+            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+            
+            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
+            if (activeTab === category) {
+                loadPostsByCategory(activeTab);
+            }
+            
+            // إعادة تعيين النموذج
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postDescription').value = '';
+            document.getElementById('postKeywords').value = '';
+            
+            alert('تم نشر المنشور بنجاح!');
+            updateAdminStats();
+        }
+
+        // رفع إعلان
+        function uploadAd() {
+            const adType = document.getElementById('adType').value;
+            const adFile = document.getElementById('adFile').files[0];
+            
+            if (!adFile) {
+                alert('يرجى اختيار ملف للإعلان!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newAd = {
+                    id: ads.length + 1,
+                    type: adType,
+                    content: e.target.result,
+                    duration: adType === 'image' ? 5 : 24,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                ads.push(newAd);
+                localStorage.setItem('worldLibraryAds', JSON.stringify(ads));
+                
+                alert('تم رفع الإعلان بنجاح!');
+                document.getElementById('adFile').value = '';
+            };
+            
+            reader.readAsDataURL(adFile);
+        }
+
+        // التحقق من كود العميل
+        function verifyCustomerCode() {
+            const code = document.getElementById('customerCode').value.trim().toUpperCase();
+            const now = new Date();
+            
+            // البحث عن كود صالح وغير مستخدم ولم ينتهي
+            const validCode = customerCodes.find(c => 
+                c.code === code && 
+                !c.used && 
+                new Date(c.expiresAt) > now
+            );
+            
+            if (validCode) {
+                document.getElementById('customerCodeSection').classList.add('hidden');
+                document.getElementById('customerPostForm').classList.remove('hidden');
+            } else {
+                alert('الكود غير صحيح أو已被使用 أو منتهي الصلاحية!');
+            }
+        }
+
+        // نشر منشور كعميل
+        function publishPostAsCustomer() {
+            const title = document.getElementById('customerPostTitle').value;
+            const description = document.getElementById('customerPostDescription').value;
+            const category = document.getElementById('customerPostCategory').value;
+            const keywords = document.getElementById('customerPostKeywords').value.split(',').map(k => k.trim());
+            const code = document.getElementById('customerCode').value.trim().toUpperCase();
+            
+            if (!title || !description) {
+                alert('يرجى ملء جميع الحقول المطلوبة!');
+                return;
+            }
+            
+            // حساب تاريخ انتهاء المنشور (7 أيام من الآن)
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+            
+            const newPost = {
+                id: posts.length + 1,
+                title: title,
+                description: description,
+                category: category,
+                keywords: keywords,
+                media: [],
+                date: new Date().toISOString().split('T')[0],
+                author: 'customer',
+                expiresAt: expiresAt.toISOString()
+            };
+            
+            posts.push(newPost);
+            localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+            
+            // تعليم الكود كمستخدم
+            const codeIndex = customerCodes.findIndex(c => c.code === code);
+            if (codeIndex !== -1) {
+                customerCodes[codeIndex].used = true;
+                customerCodes[codeIndex].usedAt = new Date().toISOString();
+                localStorage.setItem('worldLibraryCodes', JSON.stringify(customerCodes));
+            }
+            
+            // إغلاق النافذة وإعادة التعيين
+            document.getElementById('customerAreaModal').classList.add('hidden');
+            resetCustomerForm();
+            
+            alert('تم نشر المنشور بنجاح! سيبقى المنشور لمدة 7 أيام.');
+            
+            // إعادة تحميل المنشورات إذا كنا في نفس التصنيف
+            if (activeTab === category) {
+                loadPostsByCategory(activeTab);
+            }
+        }
+
+        // تنظيف المنشورات المنتهية الصلاحية
+        function cleanupExpiredPosts() {
+            const now = new Date();
+            const expiredPosts = posts.filter(post => 
+                post.expiresAt && new Date(post.expiresAt) <= now
+            );
+            
+            if (expiredPosts.length > 0) {
+                posts = posts.filter(post => 
+                    !post.expiresAt || new Date(post.expiresAt) > now
+                );
+                localStorage.setItem('worldLibraryPosts', JSON.stringify(posts));
+                console.log(`تم حذف ${expiredPosts.length} منشور منتهي الصلاحية`);
+            }
+        }
+
+        // إعادة تعيين نموذج العميل
+        function resetCustomerForm() {
+            document.getElementById('customerCode').value = '';
+            document.getElementById('customerPostTitle').value = '';
+            document.getElementById('customerPostDescription').value = '';
+            document.getElementById('customerPostKeywords').value = '';
+            document.getElementById('customerPostMedia').value = '';
+            
+            document.getElementById('customerCodeSection').classList.remove('hidden');
+            document.getElementById('customerPostForm').classList.add('hidden');
+        }
+
+        // عرض إعلان عشوائي
+        function showRandomAd() {
+            if (ads.length === 0) return;
+            
+            const randomAd = ads[Math.floor(Math.random() * ads.length)];
+            currentAd = randomAd;
+            
+            const adModal = document.getElementById('adModal');
+            const adContent = document.getElementById('adContent');
+            const adTimer = document.getElementById('adTimer');
+            
+            if (randomAd.type === 'image') {
+                adContent.innerHTML = `<img src="${randomAd.content}" alt="إعلان" class="w-full h-auto">`;
+            } else {
+                adContent.innerHTML = `
+                    <video controls autoplay class="w-full h-auto">
+                        <source src="${randomAd.content}" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+                `;
+            }
+            
+            adModal.classList.remove('hidden');
+            
+            let secondsLeft = randomAd.duration;
+            adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
+            
+            adInterval = setInterval(() => {
+                secondsLeft--;
+                adTimer.textContent = `سيتم إغلاق الإعلان تلقائياً بعد ${secondsLeft} ثانية`;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(adInterval);
+                    adModal.classList.add('hidden');
+                    
+                    // منح المستخدم صلاحية استخدام الموقع لمدة 24 ساعة
+                    const accessUntil = new Date();
+                    accessUntil.setHours(accessUntil.getHours() + 24);
+                    localStorage.setItem('worldLibraryAccessUntil', accessUntil.toISOString());
+                    
+                    alert('تم تفعيل استخدام الموقع لمدة 24 ساعة!');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+    </html>
